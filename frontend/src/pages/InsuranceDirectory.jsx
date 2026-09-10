@@ -358,7 +358,7 @@ const InsuranceDirectory = () => {
                       <div className="bg-slate-50 rounded-2xl p-4 space-y-2 border border-slate-200/60 text-xs">
                         <div className="flex items-center justify-between">
                           <span className="text-slate-500 font-medium">Sum Insured Coverage:</span>
-                          <span className="font-black text-blue-700 text-lg">${Number(plan.coverage_amount).toLocaleString()}</span>
+                          <span className="font-black text-blue-700 text-lg">₹{Number(plan.coverage_amount).toLocaleString()}</span>
                         </div>
                         {plan.eligibility && (
                           <div className="flex items-start gap-2 text-slate-600 text-[11px]">

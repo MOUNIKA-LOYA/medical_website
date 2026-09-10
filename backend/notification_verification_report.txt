@@ -1,0 +1,66 @@
+=== AUTOMATED NOTIFICATION VERIFICATION REPORT ===
+
+[1] BOOKING INITIATED (BEFORE DOCTOR CONFIRMATION):
+Status Code: 200 OK
+Sender Phone: 7893124722
+WhatsApp Message:
+🏥 *PRANA HEALTH NETWORK - BOOKING RECEIVED* ⏳
+
+Dear *Ravi Teja*,
+Your appointment request has been successfully received and is awaiting doctor confirmation.
+
+👨‍⚕️ *Doctor:* Dr. Rajesh Sharma
+🎓 *Designation:* Senior Consultant Cardiologist (Cardiology)
+🏥 *Hospital:* Prana Heart & Multispeciality Institute
+📍 *Location:* Road No. 36, Jubilee Hills, Hyderabad
+📅 *Date:* 2026-09-15
+⏰ *Time Slot:* 10:30 AM
+💰 *Estimated Fee:* ₹1,500.00
+🆔 *Ref Number:* APT-TEST-999
+
+📌 *Status:* ⏳ *Pending Doctor Review*
+You will receive an automated confirmation message as soon as Dr. Rajesh Sharma confirms your slot.
+
+📞 *Hospital Helpline:* 7893124722
+Thank you for choosing Prana Health Network.
+
+SMS Message:
+Prana Health: Dear Ravi Teja, your appointment request with Dr. Rajesh Sharma (Cardiology) at Prana Heart & Multispeciality Institute, Road No. 36, Jubilee Hills, Hyderabad on 2026-09-15 at 10:30 AM is RECEIVED (Ref: APT-TEST-999). Status: Pending Confirmation. Helpline: 7893124722.
+
+Direct WhatsApp URL:
+https://wa.me/917893124722?text=%F0%9F%8F%A5%20%2APRANA%20HEALTH%20NETWORK%20-%20BOOKING%20RECEIVED%2A%20%E2%8F%B3%0A%0ADear%20%2ARavi%20Teja%2A%2C%0AYour%20appointment%20request%20has%20been%20successfully%20received%20and%20is%20awaiting%20doctor%20confirmation.%0A%0A%F0%9F%91%A8%E2%80%8D%E2%9A%95%EF%B8%8F%20%2ADoctor%3A%2A%20Dr.%20Rajesh%20Sharma%0A%F0%9F%8E%93%20%2ADesignation%3A%2A%20Senior%20Consultant%20Cardiologist%20%28Cardiology%29%0A%F0%9F%8F%A5%20%2AHospital%3A%2A%20Prana%20Heart%20%26%20Multispeciality%20Institute%0A%F0%9F%93%8D%20%2ALocation%3A%2A%20Road%20No.%2036%2C%20Jubilee%20Hills%2C%20Hyderabad%0A%F0%9F%93%85%20%2ADate%3A%2A%202026-09-15%0A%E2%8F%B0%20%2ATime%20Slot%3A%2A%2010%3A30%20AM%0A%F0%9F%92%B0%20%2AEstimated%20Fee%3A%2A%20%E2%82%B91%2C500.00%0A%F0%9F%86%94%20%2ARef%20Number%3A%2A%20APT-TEST-999%0A%0A%F0%9F%93%8C%20%2AStatus%3A%2A%20%E2%8F%B3%20%2APending%20Doctor%20Review%2A%0AYou%20will%20receive%20an%20automated%20confirmation%20message%20as%20soon%20as%20Dr.%20Rajesh%20Sharma%20confirms%20your%20slot.%0A%0A%F0%9F%93%9E%20%2AHospital%20Helpline%3A%2A%207893124722%0AThank%20you%20for%20choosing%20Prana%20Health%20Network.
+
+--------------------------------------------------
+
+[2] DOCTOR CONFIRMATION (AFTER DOCTOR CONFIRMED):
+Status Code: 200 OK
+Sender Phone: 7893124722
+WhatsApp Message:
+✅ *APPOINTMENT CONFIRMED - PRANA HEALTH NETWORK* 🎉
+
+Dear *Ravi Teja*,
+Your appointment has been *OFFICIALLY CONFIRMED* by Dr. Rajesh Sharma.
+
+👨‍⚕️ *Doctor:* Dr. Rajesh Sharma
+🎓 *Designation:* Senior Consultant Cardiologist (Cardiology)
+🏥 *Hospital:* Prana Heart & Multispeciality Institute
+📍 *Location:* Road No. 36, Jubilee Hills, Hyderabad
+📅 *Confirmed Date:* 2026-09-15
+⏰ *Confirmed Slot:* 10:30 AM
+💰 *Consultation Fee:* ₹1,500.00
+🆔 *Appointment ID:* APT-TEST-999
+
+📋 *Doctor's Instructions:* Bring previous ECG reports. Arrive 15 min early.
+📞 *Doctor Desk / Helpline:* 7893124722
+
+We look forward to welcoming you for your consultation. Please bring any prior medical records.
+
+SMS Message:
+CONFIRMED: Dear Ravi Teja, Dr. Rajesh Sharma (Cardiology) has confirmed your appointment at Prana Heart & Multispeciality Institute, Road No. 36, Jubilee Hills, Hyderabad on 2026-09-15 at 10:30 AM. Appt ID: APT-TEST-999. Instructions: Bring previous ECG reports. Arrive 15 min early. Helpline: 7893124722.
+
+Direct WhatsApp URL:
+https://wa.me/917893124722?text=%E2%9C%85%20%2AAPPOINTMENT%20CONFIRMED%20-%20PRANA%20HEALTH%20NETWORK%2A%20%F0%9F%8E%89%0A%0ADear%20%2ARavi%20Teja%2A%2C%0AYour%20appointment%20has%20been%20%2AOFFICIALLY%20CONFIRMED%2A%20by%20Dr.%20Rajesh%20Sharma.%0A%0A%F0%9F%91%A8%E2%80%8D%E2%9A%95%EF%B8%8F%20%2ADoctor%3A%2A%20Dr.%20Rajesh%20Sharma%0A%F0%9F%8E%93%20%2ADesignation%3A%2A%20Senior%20Consultant%20Cardiologist%20%28Cardiology%29%0A%F0%9F%8F%A5%20%2AHospital%3A%2A%20Prana%20Heart%20%26%20Multispeciality%20Institute%0A%F0%9F%93%8D%20%2ALocation%3A%2A%20Road%20No.%2036%2C%20Jubilee%20Hills%2C%20Hyderabad%0A%F0%9F%93%85%20%2AConfirmed%20Date%3A%2A%202026-09-15%0A%E2%8F%B0%20%2AConfirmed%20Slot%3A%2A%2010%3A30%20AM%0A%F0%9F%92%B0%20%2AConsultation%20Fee%3A%2A%20%E2%82%B91%2C500.00%0A%F0%9F%86%94%20%2AAppointment%20ID%3A%2A%20APT-TEST-999%0A%0A%F0%9F%93%8B%20%2ADoctor%27s%20Instructions%3A%2A%20Bring%20previous%20ECG%20reports.%20Arrive%2015%20min%20early.%0A%F0%9F%93%9E%20%2ADoctor%20Desk%20/%20Helpline%3A%2A%207893124722%0A%0AWe%20look%20forward%20to%20welcoming%20you%20for%20your%20consultation.%20Please%20bring%20any%20prior%20medical%20records.
+
+--------------------------------------------------
+
+[3] NOTIFICATION AUDIT LOGS: 2 total records stored.

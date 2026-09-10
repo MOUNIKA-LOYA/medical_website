@@ -102,19 +102,44 @@ const Footer = () => {
                 </Link>
               </li>
               <li>
+                <Link to="/hospitals" className="hover:text-white transition-colors flex items-center gap-1.5">
+                  <ArrowRight className="w-3.5 h-3.5 text-[#4D9B2A]" /> Hospitals
+                </Link>
+              </li>
+              <li>
+                <Link to="/departments" className="hover:text-white transition-colors flex items-center gap-1.5">
+                  <ArrowRight className="w-3.5 h-3.5 text-[#4D9B2A]" /> Clinical Departments
+                </Link>
+              </li>
+              <li>
+                <Link to="/insurance" className="hover:text-white transition-colors flex items-center gap-1.5">
+                  <ArrowRight className="w-3.5 h-3.5 text-[#4D9B2A]" /> Insurance Plans
+                </Link>
+              </li>
+              <li>
+                <Link to="/packages" className="hover:text-white transition-colors flex items-center gap-1.5">
+                  <ArrowRight className="w-3.5 h-3.5 text-[#4D9B2A]" /> Health Packages
+                </Link>
+              </li>
+              <li>
                 <Link to="/book-appointment" className="hover:text-white transition-colors flex items-center gap-1.5">
-                  <ArrowRight className="w-3.5 h-3.5 text-[#4D9B2A]" /> Consultations
+                  <ArrowRight className="w-3.5 h-3.5 text-[#4D9B2A]" /> Book Consultation
+                </Link>
+              </li>
+              <li>
+                <Link to="/doctor-login" className="text-white hover:text-green-300 font-semibold transition-colors flex items-center gap-1.5">
+                  <ArrowRight className="w-3.5 h-3.5 text-[#4D9B2A]" /> Doctor Portal
+                </Link>
+              </li>
+              <li>
+                <Link to="/patient-login" className="text-white hover:text-green-300 font-semibold transition-colors flex items-center gap-1.5">
+                  <ArrowRight className="w-3.5 h-3.5 text-[#4D9B2A]" /> Patient Portal
                 </Link>
               </li>
               <li>
                 <Link to="/admin" className="text-white hover:text-green-300 font-semibold transition-colors flex items-center gap-1.5">
-                  <ArrowRight className="w-3.5 h-3.5 text-[#4D9B2A]" /> Staff Portal
+                  <ArrowRight className="w-3.5 h-3.5 text-[#4D9B2A]" /> Staff / Admin Portal
                 </Link>
-              </li>
-              <li>
-                <a href="#" className="hover:text-white transition-colors flex items-center gap-1.5">
-                  <ArrowRight className="w-3.5 h-3.5 text-[#4D9B2A]" /> FAQ & Help Center
-                </a>
               </li>
             </ul>
           </div>

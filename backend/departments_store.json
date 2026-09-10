@@ -1,0 +1,56 @@
+[
+  {
+    "id": "dept-1",
+    "name": "Cardiology",
+    "description": "Comprehensive cardiac evaluations, angioplasty, and cardiovascular wellness programs.",
+    "icon": "favorite"
+  },
+  {
+    "id": "dept-2",
+    "name": "Neurology",
+    "description": "Expert treatment for stroke, epilepsy, neuromuscular conditions, and spine disorders.",
+    "icon": "psychology"
+  },
+  {
+    "id": "dept-3",
+    "name": "Orthopedics",
+    "description": "Joint replacement, fracture treatment, sports trauma rehabilitation, and spine surgery.",
+    "icon": "accessibility_new"
+  },
+  {
+    "id": "dept-4",
+    "name": "Pediatrics",
+    "description": "Compassionate pediatric healthcare, immunization, neonatal intensive care, and development tracking.",
+    "icon": "child_care"
+  },
+  {
+    "id": "dept-5",
+    "name": "Gastroenterology",
+    "description": "Treatment for digestive system disorders, endoscopy, liver wellness, and metabolic care.",
+    "icon": "medical_services"
+  },
+  {
+    "id": "dept-6",
+    "name": "Dermatology",
+    "description": "Advanced therapeutic skincare, cosmetic dermatology, allergy testing, and minor laser procedures.",
+    "icon": "health_and_safety"
+  },
+  {
+    "id": "dept-7",
+    "name": "Oncology",
+    "description": "Multidisciplinary oncology care, targeted chemotherapy, surgical oncology, and patient support.",
+    "icon": "medication"
+  },
+  {
+    "id": "dept-8",
+    "name": "ENT",
+    "description": "Ear, nose, and throat diagnostic evaluation, microsurgery, and audiometric screenings.",
+    "icon": "hearing"
+  },
+  {
+    "id": "dept-9",
+    "name": "General Medicine",
+    "description": "Primary diagnosis, preventive checkups, seasonal infections, and chronic illness care.",
+    "icon": "medical_services"
+  }
+]

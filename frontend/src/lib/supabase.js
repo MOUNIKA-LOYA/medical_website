@@ -1,3 +1,8 @@
+import { createClient } from '@supabase/supabase-js';
+
+const supabaseUrl = process.env.REACT_APP_SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://xpwkgsiaavpzwjnflghe.supabase.co';
+const supabaseAnonKey = process.env.REACT_APP_SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || 'sb_publishable_UT4qq3-iFC2KQatcMPKzpQ_rD-P1rmh';
+
 // HEALING: Native Fetch Bypass (Escapes global interceptors like Visual Edits)
 // Also STRIPS invalid auth headers for dev credentials to allow Anon access
 const getNativeFetch = () => {

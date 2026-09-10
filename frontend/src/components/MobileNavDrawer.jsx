@@ -1,14 +1,31 @@
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { X, ChevronDown, ChevronRight, Phone, Clock, MapPin, Stethoscope, User, Calendar, Info, Home } from 'lucide-react';
+import { 
+  X, ChevronDown, ChevronRight, Phone, Clock, MapPin, Stethoscope, User, Calendar, Info, Home, Building2, 
+  ShieldCheck, Activity, Layers, Microscope, HeartPulse, Ambulance, Pill, Syringe, Eye, Sparkles 
+} from 'lucide-react';
 
-const MobileNavDrawer = ({ isOpen, onClose, departments = [], user, onNavigate }) => {
-  const [showDepts, setShowDepts] = useState(false);
+const DRAWER_ICON_MAP = {
+  Stethoscope, Building2, ShieldCheck, Activity, Microscope, Phone,
+  HeartPulse, Ambulance, Pill, Syringe, Eye, Sparkles
+};
+
+const renderDrawerServiceIcon = (iconName) => {
+  const IconComp = DRAWER_ICON_MAP[iconName];
+  if (IconComp) {
+    return <IconComp className="w-4 h-4 text-[#275B99]" />;
+  }
+  return <span className="material-symbols-outlined text-sm text-[#275B99]">{iconName || 'medical_services'}</span>;
+};
+
+const MobileNavDrawer = ({ isOpen, onClose, departments = [], services = [], user, onNavigate }) => {
+  const [showServices, setShowServices] = useState(false);
   const location = useLocation();
 
   if (!isOpen) return null;
 
   const isActive = (path) => location.pathname === path;
+  const activeServices = services.filter(s => s.is_active !== false);
 
   return (
     <div className="fixed inset-0 z-50 md:hidden flex justify-end">
@@ -78,32 +95,89 @@ const MobileNavDrawer = ({ isOpen, onClose, departments = [], user, onNavigate }
             <span>Doctors</span>
           </Link>
 
-          {/* Services Accordion */}
+          <Link
+            to="/hospitals"
+            onClick={onClose}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all ${
+              isActive('/hospitals') 
+                ? 'bg-blue-50 text-[#275B99] font-bold' 
+                : 'text-slate-700 hover:bg-slate-50'
+            }`}
+          >
+            <Building2 className="w-4 h-4" />
+            <span>Hospitals</span>
+          </Link>
+
+          <Link
+            to="/departments"
+            onClick={onClose}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all ${
+              isActive('/departments') 
+                ? 'bg-blue-50 text-[#275B99] font-bold' 
+                : 'text-slate-700 hover:bg-slate-50'
+            }`}
+          >
+            <Layers className="w-4 h-4" />
+            <span>Departments</span>
+          </Link>
+
+          <Link
+            to="/insurance"
+            onClick={onClose}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all ${
+              isActive('/insurance') 
+                ? 'bg-blue-50 text-[#275B99] font-bold' 
+                : 'text-slate-700 hover:bg-slate-50'
+            }`}
+          >
+            <ShieldCheck className="w-4 h-4" />
+            <span>Insurance</span>
+          </Link>
+
+          <Link
+            to="/packages"
+            onClick={onClose}
+            className={`flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all ${
+              isActive('/packages') 
+                ? 'bg-blue-50 text-[#275B99] font-bold' 
+                : 'text-slate-700 hover:bg-slate-50'
+            }`}
+          >
+            <Activity className="w-4 h-4" />
+            <span>Packages</span>
+          </Link>
+
+          {/* Dynamic Services Accordion */}
           <div>
             <button
-              onClick={() => setShowDepts(!showDepts)}
+              onClick={() => setShowServices(!showServices)}
               className="w-full flex items-center justify-between px-4 py-3 rounded-xl font-medium text-sm text-slate-700 hover:bg-slate-50 transition-all"
             >
               <div className="flex items-center gap-3">
                 <span className="material-symbols-outlined text-[20px] text-slate-500">medical_services</span>
-                <span>Services ({departments.length})</span>
+                <span>Services ({activeServices.length})</span>
               </div>
-              <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${showDepts ? 'rotate-180 text-[#275B99]' : ''}`} />
+              <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${showServices ? 'rotate-180 text-[#275B99]' : ''}`} />
             </button>
 
-            {showDepts && (
+            {showServices && (
               <div className="ml-4 pl-4 border-l-2 border-blue-100 my-1 space-y-1">
-                {departments.map((dept) => (
+                {activeServices.map((service) => (
                   <Link
-                    key={dept.id}
-                    to={`/book-appointment?dept=${encodeURIComponent(dept.name)}`}
+                    key={service.id}
+                    to={service.path || '/#services'}
                     onClick={onClose}
-                    className="flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:text-[#275B99] hover:bg-blue-50/50 transition-all"
+                    className="flex items-center justify-between gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold text-slate-600 hover:text-[#275B99] hover:bg-blue-50/50 transition-all"
                   >
-                    <span className="material-symbols-outlined text-sm text-[#275B99]">
-                      {dept.icon || 'medical_services'}
-                    </span>
-                    <span>{dept.name}</span>
+                    <div className="flex items-center gap-2">
+                      {renderDrawerServiceIcon(service.icon)}
+                      <span className="truncate">{service.title}</span>
+                    </div>
+                    {service.badge && (
+                      <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-emerald-50 text-[#4D9B2A] border border-emerald-200 shrink-0">
+                        {service.badge}
+                      </span>
+                    )}
                   </Link>
                 ))}
               </div>
@@ -138,19 +212,63 @@ const MobileNavDrawer = ({ isOpen, onClose, departments = [], user, onNavigate }
         </div>
 
         {/* Footer Actions */}
-        <div className="p-4 border-t border-slate-100 bg-slate-50/60 space-y-3">
-          {!user && (
+        <div className="p-4 border-t border-slate-100 bg-slate-50/60 space-y-2">
+          <button
+            onClick={() => {
+              onClose();
+              onNavigate('/book-appointment');
+            }}
+            className="w-full bg-[#275B99] hover:bg-[#1F4B80] text-white py-3 px-4 rounded-xl font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 active:scale-95"
+          >
+            <Calendar className="w-4 h-4" />
+            <span>Book Consultation</span>
+          </button>
+
+          {!user ? (
             <button
               onClick={() => {
                 onClose();
                 onNavigate('/patient-login');
               }}
-              className="w-full bg-[#275B99] hover:bg-[#1F4B80] text-white py-3 px-4 rounded-xl font-bold text-sm shadow-md transition-all flex items-center justify-center gap-2 active:scale-95"
+              className="w-full bg-white border border-slate-200 hover:bg-slate-50 text-slate-800 py-2.5 px-4 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2 active:scale-95"
             >
-              <User className="w-4 h-4" />
-              <span>Book Consultation</span>
+              <User className="w-3.5 h-3.5 text-[#275B99]" />
+              <span>Patient Portal / Login</span>
+            </button>
+          ) : (
+            <button
+              onClick={() => {
+                onClose();
+                onNavigate('/patient-dashboard');
+              }}
+              className="w-full bg-emerald-50 border border-emerald-200 text-emerald-700 py-2.5 px-4 rounded-xl font-bold text-xs transition-all flex items-center justify-center gap-2"
+            >
+              <User className="w-3.5 h-3.5" />
+              <span>My Patient Dashboard</span>
             </button>
           )}
+          
+          <div className="flex items-center justify-center gap-4 pt-1 text-[11px] font-semibold text-slate-500">
+            <button
+              onClick={() => {
+                onClose();
+                onNavigate('/doctor-login');
+              }}
+              className="hover:text-[#275B99] transition-colors"
+            >
+              Doctor Portal
+            </button>
+            <span>•</span>
+            <button
+              onClick={() => {
+                onClose();
+                onNavigate('/admin/login');
+              }}
+              className="hover:text-[#275B99] transition-colors"
+            >
+              Admin Portal
+            </button>
+          </div>
           
           <div className="text-center text-[10px] font-medium text-slate-400">
             Open Mon-Sun: 24 Hours Emergency Care

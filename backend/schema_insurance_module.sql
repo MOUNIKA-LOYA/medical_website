@@ -58,17 +58,40 @@ CREATE TABLE IF NOT EXISTS public.hospital_insurance (
 CREATE TABLE IF NOT EXISTS public.insurance_claims (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id TEXT,
+    patient_name TEXT,
     hospital_id UUID REFERENCES public.hospitals(id) ON DELETE CASCADE,
     provider_id UUID REFERENCES public.insurance_providers(id) ON DELETE CASCADE,
     plan_id UUID REFERENCES public.insurance_plans(id) ON DELETE SET NULL,
-    claim_number TEXT UNIQUE NOT NULL,
-    claim_amount NUMERIC NOT NULL,
+    claim_number TEXT UNIQUE,
+    claim_amount NUMERIC NOT NULL DEFAULT 0,
     approved_amount NUMERIC DEFAULT 0,
     claim_status TEXT DEFAULT 'submitted',
+    status TEXT DEFAULT 'Submitted',
+    claim_type TEXT DEFAULT 'Cashless',
+    description TEXT,
     remarks TEXT,
     submitted_at TIMESTAMPTZ DEFAULT NOW(),
+    created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Ensure all columns exist if insurance_claims was created previously
+ALTER TABLE public.insurance_claims ADD COLUMN IF NOT EXISTS user_id TEXT;
+ALTER TABLE public.insurance_claims ADD COLUMN IF NOT EXISTS patient_name TEXT;
+ALTER TABLE public.insurance_claims ADD COLUMN IF NOT EXISTS hospital_id UUID;
+ALTER TABLE public.insurance_claims ADD COLUMN IF NOT EXISTS provider_id UUID;
+ALTER TABLE public.insurance_claims ADD COLUMN IF NOT EXISTS plan_id UUID;
+ALTER TABLE public.insurance_claims ADD COLUMN IF NOT EXISTS claim_number TEXT;
+ALTER TABLE public.insurance_claims ADD COLUMN IF NOT EXISTS claim_amount NUMERIC DEFAULT 0;
+ALTER TABLE public.insurance_claims ADD COLUMN IF NOT EXISTS approved_amount NUMERIC DEFAULT 0;
+ALTER TABLE public.insurance_claims ADD COLUMN IF NOT EXISTS claim_status TEXT DEFAULT 'submitted';
+ALTER TABLE public.insurance_claims ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'Submitted';
+ALTER TABLE public.insurance_claims ADD COLUMN IF NOT EXISTS claim_type TEXT DEFAULT 'Cashless';
+ALTER TABLE public.insurance_claims ADD COLUMN IF NOT EXISTS description TEXT;
+ALTER TABLE public.insurance_claims ADD COLUMN IF NOT EXISTS remarks TEXT;
+ALTER TABLE public.insurance_claims ADD COLUMN IF NOT EXISTS submitted_at TIMESTAMPTZ DEFAULT NOW();
+ALTER TABLE public.insurance_claims ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW();
+ALTER TABLE public.insurance_claims ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
 
 -- ---------------------------------------------------------
 -- 5. INSURANCE DOCUMENTS TABLE
@@ -76,11 +99,21 @@ CREATE TABLE IF NOT EXISTS public.insurance_claims (
 CREATE TABLE IF NOT EXISTS public.insurance_documents (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     claim_id UUID REFERENCES public.insurance_claims(id) ON DELETE CASCADE,
-    document_name TEXT NOT NULL,
+    document_name TEXT,
     document_type TEXT NOT NULL,
-    document_url TEXT NOT NULL,
+    document_url TEXT,
+    file_name TEXT,
+    file_url TEXT,
     uploaded_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Ensure all columns exist if insurance_documents was created previously
+ALTER TABLE public.insurance_documents ADD COLUMN IF NOT EXISTS document_name TEXT;
+ALTER TABLE public.insurance_documents ADD COLUMN IF NOT EXISTS document_type TEXT;
+ALTER TABLE public.insurance_documents ADD COLUMN IF NOT EXISTS document_url TEXT;
+ALTER TABLE public.insurance_documents ADD COLUMN IF NOT EXISTS file_name TEXT;
+ALTER TABLE public.insurance_documents ADD COLUMN IF NOT EXISTS file_url TEXT;
+ALTER TABLE public.insurance_documents ADD COLUMN IF NOT EXISTS uploaded_at TIMESTAMPTZ DEFAULT NOW();
 
 -- =========================================================
 -- INDEXES FOR PERFORMANCE & FAST QUERYING

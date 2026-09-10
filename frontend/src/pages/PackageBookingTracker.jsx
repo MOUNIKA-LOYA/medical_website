@@ -176,7 +176,7 @@ const PackageBookingTracker = () => {
 
                 <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
                   <span className="text-slate-400 font-bold block text-[10px] uppercase">Amount Paid</span>
-                  <span className="font-bold text-emerald-600 text-sm">${Number(trackedBooking.amount).toLocaleString()}</span>
+                  <span className="font-bold text-emerald-600 text-sm">₹{Number(trackedBooking.amount).toLocaleString()}</span>
                 </div>
               </div>
             </div>
@@ -201,7 +201,7 @@ const PackageBookingTracker = () => {
                         </span>
                       </div>
                       <h4 className="font-headline font-bold text-slate-900 text-base">
-                        {b.package?.package_name || 'Health Checkup Package'} • ${Number(b.amount).toLocaleString()}
+                        {b.package?.package_name || 'Health Checkup Package'} • ₹{Number(b.amount).toLocaleString()}
                       </h4>
                       <p className="text-xs text-slate-500">{b.hospital?.hospital_name} • Reserved for {b.appointment_date}</p>
                     </div>

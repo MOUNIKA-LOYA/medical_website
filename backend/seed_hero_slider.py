@@ -1,7 +1,12 @@
 """
 Seed script for Hero Slider Images Module
 """
-from supabase import create_client, Client
+try:
+    from supabase import create_client, Client
+except ImportError:
+    create_client = None
+    Client = None
+
 from dotenv import load_dotenv
 import os
 from pathlib import Path
@@ -9,11 +14,23 @@ from pathlib import Path
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
-supabase_url = os.environ.get('SUPABASE_URL') or os.environ.get('REACT_APP_SUPABASE_URL', 'https://rdhoikphrxgyoyqdqzat.supabase.co')
-supabase_key = os.environ.get('SUPABASE_KEY') or os.environ.get('REACT_APP_SUPABASE_ANON_KEY', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJkaG9pa3BocnhneW95cWRxemF0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MjExODksImV4cCI6MjA4OTk5NzE4OX0.VaKH0kUoQqg81Tpr_Zxpnaifi8zJndCpaVawRxQMBHU')
+supabase_url = (
+    os.environ.get('SUPABASE_URL')
+    or os.environ.get('NEXT_PUBLIC_SUPABASE_URL')
+    or os.environ.get('REACT_APP_SUPABASE_URL', 'https://xpwkgsiaavpzwjnflghe.supabase.co')
+)
+supabase_key = (
+    os.environ.get('SUPABASE_KEY')
+    or os.environ.get('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY')
+    or os.environ.get('NEXT_PUBLIC_SUPABASE_ANON_KEY')
+    or os.environ.get('REACT_APP_SUPABASE_ANON_KEY', 'sb_publishable_UT4qq3-iFC2KQatcMPKzpQ_rD-P1rmh')
+)
 
 try:
-    supabase_client: Client = create_client(supabase_url, supabase_key)
+    if create_client and supabase_url and supabase_key:
+        supabase_client: Client = create_client(supabase_url, supabase_key)
+    else:
+        supabase_client = None
 except Exception as e:
     print(f"Error connecting to Supabase: {e}")
     supabase_client = None

@@ -8,16 +8,22 @@ import {
   MdMedicalServices, 
   MdFormatListBulleted,
   MdHistory,
-  MdFlashOn
+  MdFlashOn,
+  MdApartment,
+  MdMiscellaneousServices
 } from 'react-icons/md';
 import { hospitalService } from '@/lib/hospitalService';
 import { packageService } from '@/lib/packageService';
 import { insuranceService } from '@/lib/insuranceService';
+import { serviceService } from '@/lib/serviceService';
+import { departmentService } from '@/lib/departmentService';
 
 const AdminDashboard = () => {
   const [stats, setStats] = useState({
     hospitals: 0,
     doctors: 0,
+    departments: 0,
+    services: 0,
     insurance: 0,
     packages: 0,
     appointments: 0,
@@ -34,19 +40,25 @@ const AdminDashboard = () => {
         patientRes,
         hospitalsData,
         packagesData,
-        providersData
+        providersData,
+        servicesData,
+        deptsData
       ] = await Promise.all([
         supabase.from('doctors').select('*', { count: 'exact', head: true }),
         supabase.from('appointments').select('*', { count: 'exact', head: true }),
         supabase.from('patients').select('*', { count: 'exact', head: true }),
         hospitalService.getHospitals(),
         packageService.getPackages(),
-        insuranceService.getProviders()
+        insuranceService.getProviders(),
+        serviceService.getServices(),
+        departmentService.getDepartments()
       ]);
 
       setStats({
         hospitals: hospitalsData ? hospitalsData.length : 0,
         doctors: docRes?.count || 0,
+        departments: deptsData ? deptsData.length : 0,
+        services: servicesData ? servicesData.length : 0,
         insurance: providersData ? providersData.length : 0,
         packages: packagesData ? packagesData.length : 0,
         appointments: apptRes?.count || 0,
@@ -66,6 +78,8 @@ const AdminDashboard = () => {
   const metricCards = [
     { title: 'Total Hospitals', count: stats.hospitals, icon: <MdLocalHospital size={26} />, color: 'bg-blue-50 text-blue-600' },
     { title: 'Total Doctors', count: stats.doctors, icon: <MdPeople size={26} />, color: 'bg-emerald-50 text-emerald-600' },
+    { title: 'Departments', count: stats.departments, icon: <MdApartment size={26} />, color: 'bg-blue-50 text-blue-600' },
+    { title: 'Healthcare Services', count: stats.services, icon: <MdMiscellaneousServices size={26} />, color: 'bg-emerald-50 text-emerald-600' },
     { title: 'Insurance Providers', count: stats.insurance, icon: <MdShield size={26} />, color: 'bg-blue-50 text-blue-600' },
     { title: 'Diagnostic Packages', count: stats.packages, icon: <MdMedicalServices size={26} />, color: 'bg-emerald-50 text-emerald-600' },
     { title: 'Total Appointments', count: stats.appointments, icon: <MdEvent size={26} />, color: 'bg-blue-50 text-blue-600' },

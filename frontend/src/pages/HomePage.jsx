@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import NavBar from '../components/NavBar';
 import Footer from '../components/Footer';
@@ -6,11 +6,13 @@ import { supabase } from '../lib/supabaseClient';
 import { hospitalService } from '../lib/hospitalService';
 import { packageService } from '../lib/packageService';
 import { insuranceService } from '../lib/insuranceService';
+import { serviceService } from '../lib/serviceService';
+import { departmentService } from '../lib/departmentService';
 import { 
   Search, ArrowRight, ShieldCheck, Stethoscope, Clock, Calendar, 
   Building2, MapPin, CheckCircle2, ChevronDown, 
   Send, Star, Activity, Award, Phone, Users, FileText, HeartPulse,
-  Microscope, Check
+  Microscope, Check, Ambulance, Pill, Syringe, Eye, Sparkles
 } from 'lucide-react';
 
 const HomePage = () => {
@@ -22,52 +24,65 @@ const HomePage = () => {
   const [packages, setPackages] = useState([]);
   const [insuranceProviders, setInsuranceProviders] = useState([]);
   const [departments, setDepartments] = useState([]);
+  const [services, setServices] = useState([]);
   const [loading, setLoading] = useState(true);
   const [openFaq, setOpenFaq] = useState(null);
   const [newsletterEmail, setNewsletterEmail] = useState('');
   const [newsletterSubscribed, setNewsletterSubscribed] = useState(false);
   const [selectedWhyChoose, setSelectedWhyChoose] = useState(null);
+
+  const resolveServiceIcon = (iconName) => {
+    const iconMap = {
+      Stethoscope, Building2, ShieldCheck, Activity, Microscope, Phone,
+      HeartPulse, Ambulance, Pill, Syringe, Eye, Sparkles
+    };
+    return iconMap[iconName] || Stethoscope;
+  };
   
   // Hero Slider states and synchronized slides definition
   const [currentSlideIndex, setCurrentSlideIndex] = useState(0);
+  const [currentServiceIndex, setCurrentServiceIndex] = useState(0);
   const [sliderAutoplay, setSliderAutoplay] = useState(true);
 
   // Typewriter animation states for the green highlighted hero text
   const [typewriterText, setTypewriterText] = useState('');
   const sliderAutoplayRef = useRef(true);  // mirror of sliderAutoplay for closure-safe reads
 
+  // Dynamically derived list of active healthcare services for rotating typewriter text
+  const rotatingServices = useMemo(() => {
+    const activeList = (services || [])
+      .filter(s => s.is_active !== false)
+      .map(s => s.title?.trim())
+      .filter(Boolean);
+
+    if (activeList.length > 0) {
+      return activeList;
+    }
+    return [
+      'Clinical Specialists',
+      'Our Care Facilities',
+      'Direct Coverage',
+      'Wellness Panels',
+      'Advanced Diagnostics',
+      'Immediate Response'
+    ];
+  }, [services]);
+
   const heroSlides = [
     {
       id: 1,
-      badge: "PRANA Healthcare Services Network",
-      line1: "Integrated Care Built Around",
-      line2Prefix: "You ",
-      line2Amp: "&",
-      line2Suffix: " Your Loved Ones",
-      hasAmp: true,
-      subtitle: "A unified ecosystem of clinical experts, modern hospital campuses, and transparent medical coverage. Caring for you at every milestone.",
       image_url: "https://images.unsplash.com/photo-1587351021759-3e566b6af7cc?q=80&w=1600&auto=format&fit=crop",
       cardTitle: "State-of-the-Art Hospital Plaza",
       cardSubtitle: "PRANA Partner Network • 24 Hours"
     },
     {
       id: 2,
-      badge: "Advanced Facilities & Expert Care",
-      line1: "Advanced Hospitals,",
-      line2: "Trusted Care",
-      hasAmp: false,
-      subtitle: "Explore leading hospitals equipped with modern facilities, experienced specialists, and patient-focused healthcare services.",
       image_url: "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?q=80&w=1600&auto=format&fit=crop",
       cardTitle: "Modern Multi-Specialty Campus",
       cardSubtitle: "Advanced Operating & ICU Facilities"
     },
     {
       id: 3,
-      badge: "Connected Healthcare Network",
-      line1: "Right Hospital,",
-      line2: "Right Care, Right Time",
-      hasAmp: false,
-      subtitle: "Find the right hospital and specialist for your healthcare needs with a simpler, more connected care experience.",
       image_url: "https://images.unsplash.com/photo-1516549655169-df83a0774514?q=80&w=1600&auto=format&fit=crop",
       cardTitle: "Specialist Care Network",
       cardSubtitle: "Personalized Patient Healthcare Services"
@@ -78,14 +93,78 @@ const HomePage = () => {
     const loadHomepageData = async () => {
       setLoading(true);
       try {
-        const { data: docData } = await supabase.from('doctors').select('*').limit(4);
-        const { data: deptData } = await supabase.from('departments').select('*').order('name');
+        let fetchedDocs = [];
+        try {
+          const { data: docData, error: docError } = await supabase.from('doctors').select('*').limit(4);
+          if (!docError && docData && docData.length > 0) {
+            fetchedDocs = docData;
+          }
+        } catch (e) {
+          console.warn('Doctors table not yet created in Supabase, using defaults:', e);
+        }
+
+        if (!fetchedDocs || fetchedDocs.length === 0) {
+          fetchedDocs = [
+            {
+              id: 'doc-1',
+              name: 'Dr. Alaric Thorne',
+              title: 'MD, FACC - Senior Cardiologist',
+              specialty: 'Cardiology',
+              department: 'Cardiology',
+              experience_years: 15,
+              rating: 4.8,
+              review_count: 156,
+              available_today: true,
+              photo_url: 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?q=80&w=400&h=400&auto=format&fit=crop'
+            },
+            {
+              id: 'doc-2',
+              name: 'Dr. Sarah Jenkins',
+              title: 'PhD - Neurology Specialist',
+              specialty: 'Neurology',
+              department: 'Neurology',
+              experience_years: 12,
+              rating: 4.9,
+              review_count: 203,
+              available_today: true,
+              photo_url: 'https://images.unsplash.com/photo-1594824813593-1b913673752e?q=80&w=400&h=400&auto=format&fit=crop'
+            },
+            {
+              id: 'doc-3',
+              name: 'Dr. Robert Vance',
+              title: 'MD - Orthopedic Surgeon',
+              specialty: 'Orthopedics',
+              department: 'Orthopedics',
+              experience_years: 18,
+              rating: 4.7,
+              review_count: 142,
+              available_today: true,
+              photo_url: 'https://images.unsplash.com/photo-1537368910025-700350fe46c7?q=80&w=400&h=400&auto=format&fit=crop'
+            },
+            {
+              id: 'doc-4',
+              name: 'Dr. Julian Sterling',
+              title: 'MD, FACC - Senior Cardiologist',
+              specialty: 'Cardiology',
+              department: 'Cardiology',
+              experience_years: 20,
+              rating: 4.8,
+              review_count: 187,
+              available_today: true,
+              photo_url: 'https://images.unsplash.com/photo-1559839734-2b71ea197ec2?q=80&w=400&h=400&auto=format&fit=crop'
+            }
+          ];
+        }
+
+        const deptData = await departmentService.getDepartments();
+        const servData = await serviceService.getServices();
         const hospData = await hospitalService.getHospitals();
         const pkgData = await packageService.getPackages();
         const provData = await insuranceService.getProviders();
 
-        setDoctors(docData || []);
+        setDoctors(fetchedDocs);
         setDepartments(deptData || []);
+        setServices(servData || []);
         setHospitals(hospData ? hospData.slice(0, 3) : []);
         setPackages(pkgData ? pkgData.slice(0, 3) : []);
         setInsuranceProviders(provData || []);
@@ -101,17 +180,21 @@ const HomePage = () => {
   // Keep the ref mirror in sync whenever sliderAutoplay state changes
   useEffect(() => {
     sliderAutoplayRef.current = sliderAutoplay;
-  }, [sliderAutoplay]);
-
-  // Typewriter animation — self-synchronizing, production-safe
+  }, [sliderAutoplay]);  // Independent auto-slide timer for the right-side facility cards
   useEffect(() => {
-    const phrases = heroSlides.map((slide) =>
-      slide.hasAmp
-        ? `${slide.line2Prefix}${slide.line2Amp}${slide.line2Suffix}`
-        : slide.line2
-    );
+    if (!sliderAutoplay || heroSlides.length === 0) return;
+    const interval = setInterval(() => {
+      setCurrentSlideIndex((prev) => (prev + 1) % heroSlides.length);
+    }, 4500);
+    return () => clearInterval(interval);
+  }, [sliderAutoplay, heroSlides.length]);
 
-    const fullPhrase = phrases[currentSlideIndex];
+  // Typewriter animation cycling dynamically through rotatingServices
+  useEffect(() => {
+    if (!rotatingServices || rotatingServices.length === 0) return;
+
+    const safeIndex = currentServiceIndex % rotatingServices.length;
+    const fullPhrase = rotatingServices[safeIndex] || '';
     let charIdx = 0;
     let isDeleting = false;
     let timer = null;
@@ -141,24 +224,23 @@ const HomePage = () => {
           setTypewriterText(fullPhrase.slice(0, charIdx));
           timer = setTimeout(tick, 40); // deleting speed
         } else {
-          // Finished deleting: move to next slide
+          // Finished deleting: move to next service
           isDeleting = false;
           timer = setTimeout(() => {
-            setCurrentSlideIndex((prev) => (prev + 1) % phrases.length);
+            setCurrentServiceIndex((prev) => (prev + 1) % rotatingServices.length);
           }, 350); // pause before typing next
         }
       }
     };
 
-    // Reset typewriter text and start typing the current phrase
+    // Reset typewriter text and start typing the current service phrase
     setTypewriterText('');
     timer = setTimeout(tick, 75);
 
     return () => {
       if (timer) clearTimeout(timer);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentSlideIndex]);
+  }, [currentServiceIndex, rotatingServices]);
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -167,15 +249,7 @@ const HomePage = () => {
     }
   };
 
-  const handleNewsletterSubmit = (e) => {
-    e.preventDefault();
-    if (newsletterEmail) {
-      setNewsletterSubscribed(true);
-      setNewsletterEmail('');
-    }
-  };
-
-  // Static list for Featured Departments fallback
+  // Static fallback list for Featured Departments
   const featuredDeptList = [
     { title: 'Cardiology', desc: 'Comprehensive heart care, ECG, & interventional procedures.', icon: 'favorite', count: '12 Specialists' },
     { title: 'Neurology', desc: 'Advanced brain, spine, & neurological disease management.', icon: 'psychology', count: '8 Specialists' },
@@ -196,8 +270,16 @@ const HomePage = () => {
       <div className="relative z-10">
         <NavBar />
 
+        {/* Global CSS for Typewriter Blinking Cursor */}
+        <style>{`
+          @keyframes twCursorBlink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+          }
+        `}</style>
+        
         {/* ========================================================= */}
-        {/* 1. HERO SECTION — FULL-WIDTH HOSPITAL BACKGROUND WITH DARK OVERLAY */}
+        {/* HERO SECTION WITH DYNAMIC SERVICE TYPEWRITER & RIGHT SLIDER */}
         {/* ========================================================= */}
         <section 
           className="relative pt-28 pb-20 md:pt-36 md:pb-28 bg-cover bg-center overflow-hidden border-b border-blue-900"
@@ -209,75 +291,58 @@ const HomePage = () => {
           <div className="max-w-7xl mx-auto px-6 md:px-12 relative z-10">
             <div className="grid lg:grid-cols-12 gap-12 lg:gap-8 items-center">
               
-              {/* Hero Left Content */}
+              {/* Hero Left Content - Static layout with dynamic green rotating service text */}
               <div 
-                className="lg:col-span-7 space-y-6 text-center lg:text-left overflow-hidden"
+                className="lg:col-span-7 space-y-6 text-center lg:text-left"
                 onMouseEnter={() => setSliderAutoplay(false)}
                 onMouseLeave={() => setSliderAutoplay(true)}
               >
                 
-                {/* Hospital Badge - Synchronized with active slide */}
+                {/* Hospital Badge */}
                 <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-[#4D9B2A] text-xs font-bold tracking-wide transition-all duration-500">
                   <span className="w-2.5 h-2.5 rounded-full bg-[#4D9B2A] animate-pulse" />
-                  <span className="text-white">{heroSlides[currentSlideIndex].badge}</span>
+                  <span className="text-white">PRANA Healthcare Services Network</span>
                 </div>
 
-                {/* Synchronized Hero Text Horizontal Carousel Track */}
-                <div className="overflow-hidden w-full">
-                  <div 
-                    className="flex transition-transform duration-600 ease-in-out"
-                    style={{ transform: `translateX(-${currentSlideIndex * 100}%)` }}
-                  >
-                    {heroSlides.map((slide) => (
-                      <div
-                        key={slide.id}
-                        className="w-full shrink-0 flex-none space-y-3"
-                      >
-                        {/* Main Headline */}
-                        <h1 className="font-headline text-2xl sm:text-3xl md:text-4xl font-black tracking-tight text-white leading-[1.15]">
-                          <span style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>{slide.line1}</span> <br />
-                          {/* Typewriter animated green highlighted text — only shown on the active slide */}
-                          <span
-                            className="text-[#4d9b2a] inline-block"
-                            style={{
-                              fontFamily: "'Playfair Display', serif",
-                              fontWeight: 700,
-                              /* Reserve a stable minimum width so the heading doesn't shift */
-                              minWidth: '2ch',
-                              verticalAlign: 'bottom',
-                            }}
-                          >
-                            {slide.id === heroSlides[currentSlideIndex].id ? (
-                              <>
-                                {typewriterText}
-                                {/* Blinking cursor */}
-                                <span
-                                  style={{
-                                    display: 'inline-block',
-                                    width: '2px',
-                                    height: '0.9em',
-                                    background: '#4d9b2a',
-                                    marginLeft: '2px',
-                                    verticalAlign: 'middle',
-                                    borderRadius: '1px',
-                                    animation: 'twCursorBlink 0.75s step-end infinite',
-                                  }}
-                                />
-                              </>
-                            ) : (
-                              /* Non-active slides show nothing (they are offscreen anyway) */
-                              '\u00A0'
-                            )}
-                          </span>
-                        </h1>
+                {/* Hero Headline & Subtitle */}
+                <div className="space-y-3">
+                  {/* Main Headline */}
+                  <h1 className="font-headline text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black tracking-tight text-white leading-[1.15]">
+                    <span style={{ fontFamily: "'Playfair Display', serif", fontWeight: 700 }}>
+                      Integrated Care Built Around
+                    </span>{' '}
+                    <br />
+                    {/* Dynamic Green Animated Rotating Healthcare Service */}
+                    <span
+                      className="text-[#4d9b2a] inline-block"
+                      style={{
+                        fontFamily: "'Playfair Display', serif",
+                        fontWeight: 700,
+                        minWidth: '2ch',
+                        verticalAlign: 'bottom',
+                      }}
+                    >
+                      {typewriterText}
+                      {/* Blinking cursor */}
+                      <span
+                        style={{
+                          display: 'inline-block',
+                          width: '2px',
+                          height: '0.9em',
+                          background: '#4d9b2a',
+                          marginLeft: '2px',
+                          verticalAlign: 'middle',
+                          borderRadius: '1px',
+                          animation: 'twCursorBlink 0.75s step-end infinite',
+                        }}
+                      />
+                    </span>
+                  </h1>
 
-                        {/* Subtitle */}
-                        <p className="text-slate-300 text-base md:text-lg max-w-xl font-normal leading-relaxed mx-auto lg:mx-0">
-                          {slide.subtitle}
-                        </p>
-                      </div>
-                    ))}
-                  </div>
+                  {/* Subtitle */}
+                  <p className="text-slate-300 text-base md:text-lg max-w-xl font-normal leading-relaxed mx-auto lg:mx-0">
+                    Connecting patients with top-tier healthcare professionals, comprehensive medical packages, and seamless cashless hospital insurance coverage.
+                  </p>
                 </div>
 
                 {/* Search Box */}
@@ -449,27 +514,32 @@ const HomePage = () => {
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 sm:gap-6">
-              {[
-                { title: 'Clinical Specialists', subtitle: 'Expert consultations', icon: Stethoscope, path: '/doctors', bg: 'bg-blue-50 text-[#275B99]' },
-                { title: 'Our Care Facilities', subtitle: 'State-of-the-art centers', icon: Building2, path: '/hospitals', bg: 'bg-green-50 text-[#4D9B2A]' },
-                { title: 'Direct Coverage', subtitle: 'Stress-free billing', icon: ShieldCheck, path: '/insurance', bg: 'bg-blue-50 text-[#275B99]' },
-                { title: 'Wellness Panels', subtitle: 'Proactive screenings', icon: Activity, path: '/packages', bg: 'bg-green-50 text-[#4D9B2A]' },
-                { title: 'Advanced Diagnostics', subtitle: 'High-precision testing', icon: Microscope, path: '/book-appointment', bg: 'bg-blue-50 text-[#275B99]' },
-                { title: 'Immediate Response', subtitle: '24/7 emergency dispatch', icon: Phone, path: '/book-appointment', bg: 'bg-green-50 text-[#4D9B2A]' },
-              ].map((serv, idx) => {
-                const IconComp = serv.icon;
+              {(services.length > 0 ? services.filter(s => s.is_active !== false) : [
+                { title: 'Clinical Specialists', subtitle: 'Expert consultations', icon: 'Stethoscope', path: '/doctors', bg_color: 'bg-blue-50 text-[#275B99]' },
+                { title: 'Our Care Facilities', subtitle: 'State-of-the-art centers', icon: 'Building2', path: '/hospitals', bg_color: 'bg-green-50 text-[#4D9B2A]' },
+                { title: 'Direct Coverage', subtitle: 'Stress-free billing', icon: 'ShieldCheck', path: '/insurance', bg_color: 'bg-blue-50 text-[#275B99]' },
+                { title: 'Wellness Panels', subtitle: 'Proactive screenings', icon: 'Activity', path: '/packages', bg_color: 'bg-green-50 text-[#4D9B2A]' },
+                { title: 'Advanced Diagnostics', subtitle: 'High-precision testing', icon: 'Microscope', path: '/book-appointment', bg_color: 'bg-blue-50 text-[#275B99]' },
+                { title: 'Immediate Response', subtitle: '24/7 emergency dispatch', icon: 'Phone', path: '/book-appointment', bg_color: 'bg-green-50 text-[#4D9B2A]' },
+              ]).map((serv, idx) => {
+                const IconComp = resolveServiceIcon(serv.icon);
+                const bgStyle = serv.bg_color || (idx % 2 === 0 ? 'bg-blue-50 text-[#275B99]' : 'bg-green-50 text-[#4D9B2A]');
                 return (
                   <Link
-                    key={idx}
-                    to={serv.path}
+                    key={serv.id || idx}
+                    to={serv.path || '/doctors'}
                     className="group bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-[#275B99]/40 hover:-translate-y-1.5 transition-all flex flex-col items-center text-center space-y-3"
                   >
-                    <div className={`w-14 h-14 rounded-2xl ${serv.bg} flex items-center justify-center transition-all group-hover:scale-110 shadow-sm`}>
+                    <div className={`w-14 h-14 rounded-2xl ${bgStyle} flex items-center justify-center transition-all group-hover:scale-110 shadow-sm`}>
                       <IconComp className="w-7 h-7" />
                     </div>
                     <div>
-                      <h3 className="font-headline font-bold text-slate-900 text-sm group-hover:text-[#275B99] transition-colors">{serv.title}</h3>
-                      <p className="text-[11px] text-slate-500 font-medium mt-0.5">{serv.subtitle}</p>
+                      <div className="flex items-center justify-center gap-1.5">
+                        <h3 className="font-headline font-bold text-slate-900 text-sm group-hover:text-[#275B99] transition-colors line-clamp-1">
+                          {serv.title}
+                        </h3>
+                      </div>
+                      <p className="text-[11px] text-slate-500 font-medium mt-0.5 line-clamp-1">{serv.subtitle || 'Healthcare service'}</p>
                     </div>
                   </Link>
                 );
@@ -598,63 +668,87 @@ const HomePage = () => {
         </section>
 
         {/* ========================================================= */}
-        {/* 5. FEATURED DEPARTMENTS */}
+        {/* 5. FEATURED MEDICAL SPECIALISTS & BOOK CONSULTATION */}
         {/* ========================================================= */}
-        <section className="py-20 bg-white/90 backdrop-blur-sm border-b border-slate-100">
+        <section className="py-20 bg-white/95 backdrop-blur-sm border-b border-slate-200">
           <div className="max-w-7xl mx-auto px-6 md:px-12 space-y-12">
             
             <div className="flex flex-wrap items-end justify-between gap-4">
               <div className="space-y-2">
                 <span className="text-xs font-bold text-[#4D9B2A] uppercase tracking-wider bg-green-50 px-3 py-1 rounded-full border border-green-200">
-                  Medical Specialties
+                  Expert Consultations
                 </span>
                 <h2 className="font-headline text-3xl md:text-4xl font-black text-slate-900">
-                  Featured Departments
+                  Featured Medical Specialists
                 </h2>
+                <p className="text-slate-600 text-sm max-w-xl">
+                  Connect with board-certified clinical leaders. Book instant in-person or video consultations with automated SMS and WhatsApp confirmation.
+                </p>
               </div>
 
               <Link
                 to="/doctors"
-                className="text-xs font-bold text-[#275B99] hover:underline flex items-center gap-1"
+                className="py-3 px-6 bg-[#275B99] hover:bg-[#1F4B80] text-white rounded-2xl text-xs font-bold transition-all shadow-md flex items-center gap-1.5 active:scale-95"
               >
-                <span>View All Specialties</span>
-                <ArrowRight className="w-4 h-4" />
+                <span>View All Doctors</span>
+                <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             </div>
 
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {(departments.length > 0 ? departments.slice(0, 6) : featuredDeptList).map((dept, idx) => (
-                <div
-                  key={idx}
-                  className="group bg-white rounded-3xl p-7 border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-blue-200 transition-all flex flex-col justify-between"
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {doctors.slice(0, 4).map((doc) => (
+                <div 
+                  key={doc.id}
+                  className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-blue-200 transition-all flex flex-col justify-between group"
                 >
                   <div className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div className="w-14 h-14 rounded-2xl bg-blue-50 text-[#275B99] flex items-center justify-center font-bold group-hover:bg-[#275B99] group-hover:text-white transition-all shadow-sm">
-                        <span className="material-symbols-outlined text-2xl">
-                          {dept.icon || 'medical_services'}
-                        </span>
+                    <div className="relative aspect-square rounded-2xl overflow-hidden bg-slate-100 shadow-inner">
+                      <img
+                        src={doc.photo_url || 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?q=80&w=400&h=400&auto=format&fit=crop'}
+                        alt={doc.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        onError={(e) => {
+                          e.target.onerror = null;
+                          e.target.src = 'https://images.unsplash.com/photo-1622253692010-333f2da6031d?q=80&w=400&h=400&auto=format&fit=crop';
+                        }}
+                      />
+                      <div className="absolute top-3 right-3 bg-white/90 backdrop-blur-md px-2.5 py-1 rounded-full text-[10px] font-black text-[#4D9B2A] flex items-center gap-1 shadow-sm">
+                        <Star className="w-3 h-3 fill-[#4D9B2A]" />
+                        <span>{doc.rating || '4.9'}</span>
                       </div>
-                      <span className="text-xs font-bold text-[#4D9B2A] bg-green-50 border border-green-200 px-3 py-1 rounded-full">
-                        {dept.count || 'Available'}
-                      </span>
+                      <div className="absolute bottom-3 left-3 bg-[#275B99]/90 backdrop-blur-md text-white px-2.5 py-0.5 rounded-md text-[10px] font-bold">
+                        {doc.specialty || doc.department || 'Specialist'}
+                      </div>
                     </div>
 
-                    <h3 className="font-headline font-bold text-xl text-slate-900 group-hover:text-[#275B99] transition-colors">
-                      {dept.name || dept.title}
-                    </h3>
-                    <p className="text-slate-600 text-xs leading-relaxed">
-                      {dept.description || dept.desc || 'Specialized diagnostic procedures and advanced therapeutic treatments with expert clinicians.'}
-                    </p>
+                    <div>
+                      <h3 className="font-headline font-bold text-lg text-slate-900 group-hover:text-[#275B99] transition-colors line-clamp-1">
+                        {doc.name}
+                      </h3>
+                      <p className="text-xs text-slate-500 font-medium line-clamp-1 mt-0.5">
+                        {doc.title || 'Senior Consultant'}
+                      </p>
+                      <div className="flex items-center gap-1.5 text-xs text-slate-500 font-medium mt-2">
+                        <Building2 className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                        <span className="truncate">{doc.schedule_details?.hospital_name || 'Prana Medical Center'}</span>
+                      </div>
+                    </div>
                   </div>
 
-                  <Link
-                    to={`/doctors?department=${encodeURIComponent(dept.name || dept.title)}`}
-                    className="text-xs font-bold text-[#275B99] hover:underline flex items-center gap-1.5 pt-4 mt-4 border-t border-slate-100"
-                  >
-                    <span>Consult Department Doctor</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </Link>
+                  <div className="pt-4 mt-4 border-t border-slate-100 space-y-2">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="text-slate-400 font-medium">Consultation Fee</span>
+                      <span className="font-extrabold text-[#275B99] text-sm">₹{doc.consultation_fee ? Math.round(doc.consultation_fee * 0.9) : 135}</span>
+                    </div>
+
+                    <Link
+                      to={`/book-appointment/${doc.id}`}
+                      className="w-full py-2.5 bg-[#275B99] hover:bg-[#1F4B80] text-white rounded-xl font-bold text-xs shadow-md transition-all text-center flex items-center justify-center gap-1.5 active:scale-95"
+                    >
+                      <Calendar className="w-3.5 h-3.5" />
+                      <span>Book Consultation</span>
+                    </Link>
+                  </div>
                 </div>
               ))}
             </div>
@@ -735,6 +829,83 @@ const HomePage = () => {
                 ))}
               </div>
             )}
+
+          </div>
+        </section>
+
+        {/* ========================================================= */}
+        {/* 7. FEATURED DEPARTMENTS (AFTER HOSPITALS) */}
+        {/* ========================================================= */}
+        <section id="services" className="py-20 bg-white/90 backdrop-blur-sm border-b border-slate-100">
+          <div className="max-w-7xl mx-auto px-6 md:px-12 space-y-12">
+            
+            <div className="flex flex-wrap items-end justify-between gap-4">
+              <div className="space-y-2">
+                <span className="text-xs font-bold text-[#4D9B2A] uppercase tracking-wider bg-green-50 px-3 py-1 rounded-full border border-green-200">
+                  Medical Specialties
+                </span>
+                <h2 className="font-headline text-3xl md:text-4xl font-black text-slate-900">
+                  Featured Clinical Departments
+                </h2>
+                <p className="text-slate-600 text-sm max-w-xl">
+                  Explore specialized clinical wings offering comprehensive diagnostic, surgical, and therapeutic services.
+                </p>
+              </div>
+
+              <Link
+                to="/departments"
+                className="py-3 px-6 bg-[#275B99] hover:bg-[#1F4B80] text-white rounded-2xl text-xs font-bold transition-all shadow-md flex items-center gap-1.5 active:scale-95"
+              >
+                <span>View All Departments</span>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {(departments.length > 0 ? departments.slice(0, 6) : featuredDeptList).map((dept, idx) => (
+                <div
+                  key={idx}
+                  className="group bg-white rounded-3xl p-7 border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-blue-200 transition-all flex flex-col justify-between"
+                >
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="w-14 h-14 rounded-2xl bg-blue-50 text-[#275B99] flex items-center justify-center font-bold group-hover:bg-[#275B99] group-hover:text-white transition-all shadow-sm">
+                        <span className="material-symbols-outlined text-2xl">
+                          {dept.icon || 'medical_services'}
+                        </span>
+                      </div>
+                      <span className="text-xs font-bold text-[#4D9B2A] bg-green-50 border border-green-200 px-3 py-1 rounded-full">
+                        {dept.count || 'Available'}
+                      </span>
+                    </div>
+
+                    <h3 className="font-headline font-bold text-xl text-slate-900 group-hover:text-[#275B99] transition-colors">
+                      {dept.name || dept.title}
+                    </h3>
+                    <p className="text-slate-600 text-xs leading-relaxed">
+                      {dept.description || dept.desc || 'Specialized diagnostic procedures and advanced therapeutic treatments with expert clinicians.'}
+                    </p>
+                  </div>
+
+                  <div className="pt-4 mt-4 border-t border-slate-100 flex items-center justify-between gap-3">
+                    <Link
+                      to={`/doctors?department=${encodeURIComponent(dept.name || dept.title)}`}
+                      className="text-xs font-bold text-[#275B99] hover:underline flex items-center gap-1"
+                    >
+                      <span>Doctors</span>
+                      <ArrowRight className="w-3 h-3" />
+                    </Link>
+
+                    <Link
+                      to={`/book-appointment?dept=${encodeURIComponent(dept.name || dept.title)}`}
+                      className="px-4 py-2 bg-blue-50 hover:bg-[#275B99] text-[#275B99] hover:text-white rounded-xl text-xs font-bold transition-all shadow-sm flex items-center gap-1"
+                    >
+                      <span>Book Consultation</span>
+                    </Link>
+                  </div>
+                </div>
+              ))}
+            </div>
 
           </div>
         </section>

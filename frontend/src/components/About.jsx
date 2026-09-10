@@ -24,8 +24,41 @@ import {
 
 const DEFAULT_DOCTOR_AVATAR = "https://images.unsplash.com/photo-1622253692010-333f2da6031d?q=80&w=400&h=400&auto=format&fit=crop";
 
+const DEFAULT_LEADERS = [
+  {
+    id: "doc-101",
+    name: "Dr. Rajesh Sharma",
+    title: "Senior Consultant Interventional Cardiologist",
+    specialty: "Cardiology",
+    department: "Cardiology",
+    experience_years: 18,
+    about: "Specialized in complex coronary interventions, structural heart disease, and preventative cardiac health.",
+    photo_url: "https://images.unsplash.com/photo-1622253692010-333f2da6031d?q=80&w=400&h=400&auto=format&fit=crop"
+  },
+  {
+    id: "doc-102",
+    name: "Dr. Ananya Reddy",
+    title: "Chief Neurosurgeon & Spine Specialist",
+    specialty: "Neurology",
+    department: "Neurology",
+    experience_years: 16,
+    about: "Pioneer in minimally invasive neurosurgery and comprehensive spine rehabilitation protocols.",
+    photo_url: "https://images.unsplash.com/photo-1594824813511-2856011c79e6?q=80&w=400&h=400&auto=format&fit=crop"
+  },
+  {
+    id: "doc-103",
+    name: "Dr. Vikram Joshi",
+    title: "Senior Orthopedic & Joint Replacement Surgeon",
+    specialty: "Orthopedics",
+    department: "Orthopedics",
+    experience_years: 15,
+    about: "Expert in computer-navigated robotic joint replacements and advanced sports trauma management.",
+    photo_url: "https://images.unsplash.com/photo-1537368910025-700350fe46c7?q=80&w=400&h=400&auto=format&fit=crop"
+  }
+];
+
 const About = () => {
-  const [leaders, setLeaders] = useState([]);
+  const [leaders, setLeaders] = useState(DEFAULT_LEADERS);
   const [hospitals, setHospitals] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -40,9 +73,12 @@ const About = () => {
 
         if (data && data.length > 0) {
           setLeaders(data);
+        } else {
+          setLeaders(DEFAULT_LEADERS);
         }
       } catch (err) {
         console.error('Error fetching leadership doctors:', err);
+        setLeaders(DEFAULT_LEADERS);
       }
 
       try {

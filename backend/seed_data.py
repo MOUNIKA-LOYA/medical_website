@@ -1,7 +1,12 @@
 """
 Script to seed the database with sample data for Clinical Serenity
 """
-from supabase import create_client, Client
+try:
+    from supabase import create_client, Client
+except ImportError:
+    create_client = None
+    Client = None
+
 from dotenv import load_dotenv
 import os
 from pathlib import Path
@@ -9,10 +14,26 @@ from pathlib import Path
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
-supabase_url = os.environ.get('SUPABASE_URL') or os.environ.get('REACT_APP_SUPABASE_URL', 'https://rdhoikphrxgyoyqdqzat.supabase.co')
-supabase_key = os.environ.get('SUPABASE_KEY') or os.environ.get('REACT_APP_SUPABASE_ANON_KEY', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJkaG9pa3BocnhneW95cWRxemF0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MjExODksImV4cCI6MjA4OTk5NzE4OX0.VaKH0kUoQqg81Tpr_Zxpnaifi8zJndCpaVawRxQMBHU')
+supabase_url = (
+    os.environ.get('SUPABASE_URL')
+    or os.environ.get('NEXT_PUBLIC_SUPABASE_URL')
+    or os.environ.get('REACT_APP_SUPABASE_URL', 'https://xpwkgsiaavpzwjnflghe.supabase.co')
+)
+supabase_key = (
+    os.environ.get('SUPABASE_KEY')
+    or os.environ.get('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY')
+    or os.environ.get('NEXT_PUBLIC_SUPABASE_ANON_KEY')
+    or os.environ.get('REACT_APP_SUPABASE_ANON_KEY', 'sb_publishable_UT4qq3-iFC2KQatcMPKzpQ_rD-P1rmh')
+)
 
-supabase_client: Client = create_client(supabase_url, supabase_key)
+try:
+    if create_client and supabase_url and supabase_key:
+        supabase_client: Client = create_client(supabase_url, supabase_key)
+    else:
+        supabase_client = None
+except Exception as e:
+    print(f"Warning: Could not connect to Supabase: {e}")
+    supabase_client = None
 
 
 def seed_database():
@@ -55,9 +76,12 @@ def seed_database():
         }
     ]
     try:
-        print("Seeding departments...")
-        supabase_client.table("departments").upsert(departments).execute()
-        print(f"[OK] Seeded {len(departments)} departments")
+        if supabase_client:
+            print("Seeding departments...")
+            supabase_client.table("departments").upsert(departments).execute()
+            print(f"[OK] Seeded {len(departments)} departments")
+        else:
+            print("Notice: Supabase client not initialized. Skipped remote department seed.")
     except Exception as e:
         print(f"Notice: Supabase seeding for departments skipped: {e}")
     
@@ -209,8 +233,12 @@ def seed_database():
         }
     ]
     try:
-        supabase_client.table("doctors").upsert(doctors).execute()
-        print(f"[OK] Seeded {len(doctors)} doctors")
+        if supabase_client:
+            print("Seeding doctors...")
+            supabase_client.table("doctors").upsert(doctors).execute()
+            print(f"[OK] Seeded {len(doctors)} doctors")
+        else:
+            print("Notice: Supabase client not initialized. Skipped remote doctor seed.")
     except Exception as e:
         print(f"Notice: Supabase seeding for doctors skipped: {e}")
     

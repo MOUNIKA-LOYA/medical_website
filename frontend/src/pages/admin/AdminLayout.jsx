@@ -9,7 +9,9 @@ import {
   MdShield,
   MdMedicalServices,
   MdSettings,
-  MdPhotoLibrary
+  MdPhotoLibrary,
+  MdApartment,
+  MdBiotech
 } from 'react-icons/md';
 import { supabase } from '@/lib/supabaseClient';
 
@@ -31,8 +33,10 @@ const AdminLayout = () => {
     { name: 'Dashboard', path: '/admin', icon: <MdDashboard size={20} />, exact: true },
     { name: 'Hospitals', path: '/admin/hospitals', icon: <MdLocalHospital size={20} /> },
     { name: 'Doctors', path: '/admin/doctors', icon: <MdPeople size={20} /> },
+    { name: 'Departments', path: '/admin/departments', icon: <MdApartment size={20} /> },
+    { name: 'Services', path: '/admin/services', icon: <MdMedicalServices size={20} /> },
     { name: 'Insurance', path: '/admin/insurance', icon: <MdShield size={20} /> },
-    { name: 'Diagnostic Packages', path: '/admin/packages', icon: <MdMedicalServices size={20} /> },
+    { name: 'Diagnostic Packages', path: '/admin/packages', icon: <MdBiotech size={20} /> },
     { name: 'Appointments', path: '/admin/appointments', icon: <MdEvent size={20} /> },
     { name: 'Patients', path: '/admin/patients', icon: <MdPeople size={20} /> },
     { name: 'Hero Slider', path: '/admin/slider', icon: <MdPhotoLibrary size={20} /> },

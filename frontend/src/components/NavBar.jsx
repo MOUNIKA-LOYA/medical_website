@@ -1,10 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
-import { ChevronDown, ChevronRight, Phone, Clock, Menu, ShieldAlert, User } from 'lucide-react';
+import { 
+  ChevronDown, ChevronRight, Phone, Clock, Menu, ShieldAlert, User, Calendar,
+  Stethoscope, Building2, ShieldCheck, Activity, Microscope, HeartPulse, Ambulance, Pill, Syringe, Eye, Sparkles
+} from 'lucide-react';
 import { supabase } from '@/lib/supabaseClient';
+import { departmentService } from '@/lib/departmentService';
+import { serviceService } from '@/lib/serviceService';
 import MobileNavDrawer from './MobileNavDrawer';
 
+const ICON_MAP = {
+  Stethoscope, Building2, ShieldCheck, Activity, Microscope, Phone,
+  HeartPulse, Ambulance, Pill, Syringe, Eye, Sparkles
+};
+
+const renderNavServiceIcon = (iconName) => {
+  const IconComp = ICON_MAP[iconName];
+  if (IconComp) {
+    return <IconComp className="w-5 h-5" />;
+  }
+  return <span className="material-symbols-outlined text-[20px]">{iconName || 'medical_services'}</span>;
+};
+
 const NavBar = () => {
+  const [services, setServices] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -15,11 +34,30 @@ const NavBar = () => {
   const location = useLocation();
 
   useEffect(() => {
-    const fetchDepts = async () => {
-      const { data } = await supabase.from('departments').select('*').order('name');
-      setDepartments(data || []);
+    const fetchAllData = async () => {
+      try {
+        const servs = await serviceService.getServices();
+        setServices(servs || []);
+      } catch (err) {
+        console.warn('Error fetching services in NavBar:', err);
+      }
+
+      try {
+        const depts = await departmentService.getDepartments();
+        setDepartments(depts || []);
+      } catch (err) {
+        console.warn('Error fetching departments in NavBar:', err);
+      }
     };
-    fetchDepts();
+
+    fetchAllData();
+
+    const handleServicesUpdate = () => {
+      fetchAllData();
+    };
+
+    window.addEventListener('services_updated', handleServicesUpdate);
+    window.addEventListener('storage', handleServicesUpdate);
 
     // Check session
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -30,7 +68,11 @@ const NavBar = () => {
       setUser(session?.user || null);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      window.removeEventListener('services_updated', handleServicesUpdate);
+      window.removeEventListener('storage', handleServicesUpdate);
+      subscription.unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
@@ -137,6 +179,20 @@ const NavBar = () => {
               </Link>
 
               <Link
+                to="/departments"
+                className={`font-semibold text-sm transition-all relative py-2 ${
+                  isActive('/departments') || location.pathname.startsWith('/departments')
+                    ? 'text-[#275B99] font-bold' 
+                    : 'text-[#111827] hover:text-[#275B99]'
+                }`}
+              >
+                <span>Departments</span>
+                {(isActive('/departments') || location.pathname.startsWith('/departments')) && (
+                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-[#275B99] rounded-full animate-fade-in-up" />
+                )}
+              </Link>
+
+              <Link
                 to="/insurance"
                 className={`font-semibold text-sm transition-all relative py-2 ${
                   isActive('/insurance') || location.pathname.startsWith('/insurance')
@@ -176,43 +232,51 @@ const NavBar = () => {
                 </button>
 
                 {/* Modern Dropdown Menu */}
-                <div className={`absolute top-[85%] left-1/2 -translate-x-1/2 w-80 bg-white rounded-2xl shadow-xl border border-slate-200/80 overflow-hidden transition-all duration-200 origin-top ${
+                <div className={`absolute top-[85%] left-1/2 -translate-x-1/2 w-88 md:w-96 bg-white rounded-2xl shadow-xl border border-slate-200/80 overflow-hidden transition-all duration-200 origin-top ${
                   isDropdownOpen ? 'opacity-100 scale-100 pointer-events-auto' : 'opacity-0 scale-95 pointer-events-none'
                 }`}>
                   <div className="p-3 border-b border-slate-100 bg-slate-50 flex items-center justify-between px-4">
-                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Medical Specialties</span>
-                    <span className="bg-blue-50 text-[#275B99] border border-blue-100 text-[10px] font-bold px-2 py-0.5 rounded-full">{departments.length} Available</span>
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">Healthcare Services</span>
+                    <span className="bg-blue-50 text-[#275B99] border border-blue-100 text-[10px] font-bold px-2 py-0.5 rounded-full">
+                      {services.filter(s => s.is_active !== false).length} Available
+                    </span>
                   </div>
 
-                  <div className="max-h-[360px] overflow-y-auto custom-scrollbar p-2 space-y-1">
-                    {departments.length === 0 ? (
-                      <div className="p-4 text-center text-slate-400 text-xs italic">Loading specialties...</div>
+                  <div className="max-h-[380px] overflow-y-auto custom-scrollbar p-2 space-y-1">
+                    {services.filter(s => s.is_active !== false).length === 0 ? (
+                      <div className="p-4 text-center text-slate-400 text-xs italic">Loading services...</div>
                     ) : (
-                      departments.map((dept) => (
-                        <Link
-                          key={dept.id}
-                          to={`/book-appointment?dept=${encodeURIComponent(dept.name)}`}
-                          className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-blue-50/60 transition-colors group/item"
-                          onClick={() => setIsDropdownOpen(false)}
-                        >
-                          <div className="w-9 h-9 rounded-xl bg-blue-50 text-[#275B99] flex items-center justify-center shrink-0 group-hover/item:bg-[#275B99] group-hover/item:text-white transition-all shadow-sm">
-                            <span className="material-symbols-outlined text-[20px]">
-                              {dept.icon || 'medical_services'}
-                            </span>
-                          </div>
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm font-semibold text-slate-800 group-hover/item:text-[#275B99] transition-colors truncate">
-                                {dept.name}
-                              </span>
-                              <ChevronRight className="w-3.5 h-3.5 text-slate-300 group-hover/item:text-[#275B99] group-hover/item:translate-x-0.5 transition-all shrink-0 ml-1" />
+                      services
+                        .filter(s => s.is_active !== false)
+                        .sort((a, b) => (a.display_order || 0) - (b.display_order || 0))
+                        .map((service) => (
+                          <Link
+                            key={service.id}
+                            to={service.path || '/#services'}
+                            className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-blue-50/60 transition-colors group/item"
+                            onClick={() => setIsDropdownOpen(false)}
+                          >
+                            <div className="w-9 h-9 rounded-xl bg-blue-50 text-[#275B99] flex items-center justify-center shrink-0 group-hover/item:bg-[#275B99] group-hover/item:text-white transition-all shadow-sm">
+                              {renderNavServiceIcon(service.icon)}
                             </div>
-                            <p className="text-[11px] text-slate-500 line-clamp-1 mt-0.5">
-                              {dept.description || 'Specialized diagnostic & therapeutic care'}
-                            </p>
-                          </div>
-                        </Link>
-                      ))
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between gap-1">
+                                <span className="text-sm font-semibold text-slate-800 group-hover/item:text-[#275B99] transition-colors truncate">
+                                  {service.title}
+                                </span>
+                                {service.badge && (
+                                  <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-emerald-50 text-[#4D9B2A] border border-emerald-200 shrink-0">
+                                    {service.badge}
+                                  </span>
+                                )}
+                                <ChevronRight className="w-3.5 h-3.5 text-slate-300 group-hover/item:text-[#275B99] group-hover/item:translate-x-0.5 transition-all shrink-0 ml-0.5" />
+                              </div>
+                              <p className="text-[11px] text-slate-500 line-clamp-1 mt-0.5">
+                                {service.subtitle || service.description || 'Comprehensive clinical healthcare service'}
+                              </p>
+                            </div>
+                          </Link>
+                        ))
                     )}
                   </div>
 
@@ -221,7 +285,7 @@ const NavBar = () => {
                     className="block p-3 bg-slate-50 hover:bg-blue-50 text-center text-xs font-bold text-slate-700 hover:text-[#275B99] transition-all border-t border-slate-100"
                     onClick={() => setIsDropdownOpen(false)}
                   >
-                    Explore All Specialties
+                    Explore All Healthcare Services
                   </Link>
                 </div>
               </div>
@@ -257,13 +321,30 @@ const NavBar = () => {
 
             {/* Right Action & Mobile Toggle */}
             <div className="md:flex-1 flex justify-end items-center gap-3">
-              {!user && (
-                <button 
-                  onClick={() => navigate('/patient-login')}
-                  className="bg-[#275B99] hover:bg-[#1F4B80] text-white px-5 py-2.5 rounded-2xl font-bold text-xs transition-all shadow-sm hover:shadow-md active:scale-95 flex items-center gap-2"
+              {!user ? (
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={() => navigate('/book-appointment')}
+                    className="bg-[#275B99] hover:bg-[#1F4B80] text-white px-5 py-2.5 rounded-2xl font-bold text-xs transition-all shadow-sm hover:shadow-md active:scale-95 flex items-center gap-2"
+                  >
+                    <Calendar className="w-3.5 h-3.5 text-white" />
+                    <span>Book Consultation</span>
+                  </button>
+                  <button 
+                    onClick={() => navigate('/patient-login')}
+                    className="hidden lg:flex items-center gap-1.5 px-3.5 py-2 rounded-2xl text-xs font-bold text-slate-700 hover:text-[#275B99] hover:bg-blue-50 transition-all border border-slate-200"
+                  >
+                    <User className="w-3.5 h-3.5 text-slate-500" />
+                    <span>Patient Portal</span>
+                  </button>
+                </div>
+              ) : (
+                <button
+                  onClick={() => navigate('/patient-dashboard')}
+                  className="bg-emerald-50 text-emerald-700 border border-emerald-200 px-4 py-2 rounded-2xl font-bold text-xs flex items-center gap-1.5 hover:bg-emerald-100 transition-all"
                 >
-                  <User className="w-3.5 h-3.5 text-white" />
-                  <span>Book Consultation</span>
+                  <User className="w-3.5 h-3.5" />
+                  <span>My Dashboard</span>
                 </button>
               )}
 
@@ -286,6 +367,7 @@ const NavBar = () => {
         isOpen={isMobileMenuOpen}
         onClose={() => setIsMobileMenuOpen(false)}
         departments={departments}
+        services={services}
         user={user}
         onNavigate={(path) => navigate(path)}
       />

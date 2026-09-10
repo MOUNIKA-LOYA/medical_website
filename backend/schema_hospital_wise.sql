@@ -149,10 +149,21 @@ CREATE TABLE IF NOT EXISTS public.hospital_reviews (
     hospital_id UUID REFERENCES public.hospitals(id) ON DELETE CASCADE,
     user_id TEXT,
     user_name TEXT DEFAULT 'Anonymous Patient',
-    rating NUMERIC NOT NULL CHECK (rating >= 1 AND rating <= 5),
-    review TEXT NOT NULL,
+    patient_name TEXT DEFAULT 'Anonymous Patient',
+    rating NUMERIC DEFAULT 5.0,
+    review TEXT,
+    comment TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Ensure columns exist if hospital_reviews was created previously
+ALTER TABLE public.hospital_reviews ADD COLUMN IF NOT EXISTS user_id TEXT;
+ALTER TABLE public.hospital_reviews ADD COLUMN IF NOT EXISTS user_name TEXT DEFAULT 'Anonymous Patient';
+ALTER TABLE public.hospital_reviews ADD COLUMN IF NOT EXISTS patient_name TEXT DEFAULT 'Anonymous Patient';
+ALTER TABLE public.hospital_reviews ADD COLUMN IF NOT EXISTS rating NUMERIC DEFAULT 5.0;
+ALTER TABLE public.hospital_reviews ADD COLUMN IF NOT EXISTS review TEXT;
+ALTER TABLE public.hospital_reviews ADD COLUMN IF NOT EXISTS comment TEXT;
+ALTER TABLE public.hospital_reviews ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW();
 
 -- ---------------------------------------------------------
 -- 9. HOSPITAL IMAGES TABLE
@@ -165,6 +176,13 @@ CREATE TABLE IF NOT EXISTS public.hospital_images (
     display_order INTEGER DEFAULT 0,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Ensure columns exist if hospital_images was created previously
+ALTER TABLE public.hospital_images ADD COLUMN IF NOT EXISTS hospital_id UUID;
+ALTER TABLE public.hospital_images ADD COLUMN IF NOT EXISTS image_url TEXT;
+ALTER TABLE public.hospital_images ADD COLUMN IF NOT EXISTS image_type TEXT DEFAULT 'gallery';
+ALTER TABLE public.hospital_images ADD COLUMN IF NOT EXISTS display_order INTEGER DEFAULT 0;
+ALTER TABLE public.hospital_images ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW();
 
 -- =========================================================
 -- INDEXES FOR PERFORMANCE & FAST FILTERING

@@ -1,10 +1,27 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { supabase } from '@/lib/supabaseClient';
-import { MdAdd, MdEdit, MdDelete, MdSearch } from 'react-icons/md';
+import { departmentService } from '@/lib/departmentService';
+import { MdAdd, MdEdit, MdDelete, MdSearch, MdApartment } from 'react-icons/md';
+
+const DEPARTMENT_ICONS = [
+  { label: 'Cardiology (Heart)', value: 'favorite' },
+  { label: 'Neurology (Brain/Mind)', value: 'psychology' },
+  { label: 'Orthopedics (Bones/Joints)', value: 'accessibility_new' },
+  { label: 'Pediatrics (Child Care)', value: 'child_care' },
+  { label: 'Gastroenterology (Digestive)', value: 'medical_services' },
+  { label: 'Dermatology (Skin)', value: 'health_and_safety' },
+  { label: 'Oncology (Cancer Care)', value: 'medication' },
+  { label: 'ENT (Ear, Nose, Throat)', value: 'hearing' },
+  { label: 'Ophthalmology (Eyes)', value: 'visibility' },
+  { label: 'Dental / Oral Care', value: 'dentistry' },
+  { label: 'Emergency / Trauma', value: 'emergency' },
+  { label: 'Radiology / X-Ray', value: 'biotech' },
+  { label: 'General / Clinical', value: 'clinical_notes' },
+];
 
 const AdminDepartments = () => {
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
   
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingDepartment, setEditingDepartment] = useState(null);
@@ -13,11 +30,10 @@ const AdminDepartments = () => {
   const fetchData = useCallback(async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.from('departments').select('*').order('name');
-      if (error) throw error;
+      const data = await departmentService.getDepartments();
       setDepartments(data || []);
     } catch (error) {
-      console.error('Error fetching data:', error);
+      console.error('Error fetching departments:', error);
     } finally {
       setLoading(false);
     }
@@ -30,7 +46,11 @@ const AdminDepartments = () => {
   const handleOpenModal = (dept = null) => {
     if (dept) {
       setEditingDepartment(dept);
-      setFormData(dept);
+      setFormData({
+        name: dept.name || '',
+        description: dept.description || '',
+        icon: dept.icon || 'medical_services'
+      });
     } else {
       setEditingDepartment(null);
       setFormData({ name: '', description: '', icon: 'medical_services' });
@@ -40,26 +60,27 @@ const AdminDepartments = () => {
 
   const handleSave = async (e) => {
     e.preventDefault();
+    if (!formData.name.trim()) {
+      return alert('Department name is required');
+    }
+
     try {
       if (editingDepartment) {
-        const { error } = await supabase.from('departments').update(formData).eq('id', editingDepartment.id);
-        if (error) throw error;
+        await departmentService.updateDepartment(editingDepartment.id, formData);
       } else {
-        const { error } = await supabase.from('departments').insert([formData]);
-        if (error) throw error;
+        await departmentService.createDepartment(formData);
       }
       setIsModalOpen(false);
-      fetchData();
+      await fetchData();
     } catch (error) {
       alert('Error saving department: ' + error.message);
     }
   };
 
   const handleDelete = async (id) => {
-    if (window.confirm('Are you sure you want to delete this department?')) {
+    if (window.confirm('Are you sure you want to delete this department? Doctors and consultations under this department will be impacted.')) {
       try {
-        const { error } = await supabase.from('departments').delete().eq('id', id);
-        if (error) throw error;
+        await departmentService.deleteDepartment(id);
         fetchData();
       } catch (error) {
         alert('Error deleting department: ' + error.message);
@@ -67,60 +88,104 @@ const AdminDepartments = () => {
     }
   };
 
+  const filteredDepartments = departments.filter(dept =>
+    (dept.name || '').toLowerCase().includes(search.toLowerCase()) ||
+    (dept.description || '').toLowerCase().includes(search.toLowerCase())
+  );
+
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-slate-900">Manage Departments</h2>
+    <div className="space-y-6 animate-fade-in-up">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+        <div>
+          <h2 className="text-2xl font-black text-slate-900 tracking-tight flex items-center gap-2">
+            <span className="material-symbols-outlined text-blue-600">apartment</span>
+            Manage Medical Departments
+          </h2>
+          <p className="text-xs text-slate-500 font-medium mt-0.5">
+            Dynamically add and organize medical specialties across doctors, appointments, and hospital wings.
+          </p>
+        </div>
         <button 
           onClick={() => handleOpenModal()}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium flex items-center gap-2 transition-colors"
+          className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 transition-all shadow-sm active:scale-95"
         >
-          <MdAdd size={20} /> Add Department
+          <MdAdd size={18} /> Add New Department
         </button>
       </div>
 
-      <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
+      {/* Main Table Card */}
+      <div className="bg-white rounded-2xl shadow-sm border border-slate-200/80 overflow-hidden">
+        {/* Toolbar */}
+        <div className="p-4 border-b border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="relative w-full sm:w-80">
+            <MdSearch className="absolute left-3.5 top-3 text-slate-400" size={18} />
+            <input
+              type="text"
+              placeholder="Search departments..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div className="text-xs font-semibold text-slate-500">
+            Total output: <strong className="text-slate-800">{filteredDepartments.length}</strong> departments
+          </div>
+        </div>
+
+        {/* Table */}
         <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead className="bg-slate-50 border-b border-slate-100 text-left">
+          <table className="w-full text-left">
+            <thead className="bg-slate-50 border-b border-slate-100">
               <tr>
-                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Icon / Name</th>
-                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest">Description</th>
-                <th className="px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-widest text-right">Actions</th>
+                <th className="px-6 py-4 text-[11px] font-black text-slate-400 uppercase tracking-wider">Department / Specialty</th>
+                <th className="px-6 py-4 text-[11px] font-black text-slate-400 uppercase tracking-wider">Description</th>
+                <th className="px-6 py-4 text-[11px] font-black text-slate-400 uppercase tracking-wider text-right">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 text-xs">
               {loading ? (
                 <tr>
-                  <td colSpan="3" className="px-6 py-8 text-center text-slate-500">Loading data...</td>
+                  <td colSpan="3" className="px-6 py-12 text-center text-slate-400">Loading departments...</td>
                 </tr>
-              ) : departments.length === 0 ? (
+              ) : filteredDepartments.length === 0 ? (
                 <tr>
-                  <td colSpan="3" className="px-6 py-8 text-center text-slate-500">No departments found.</td>
+                  <td colSpan="3" className="px-6 py-12 text-center text-slate-400">
+                    No departments found matching your search.
+                  </td>
                 </tr>
               ) : (
-                departments.map(dept => (
-                  <tr key={dept.id} className="hover:bg-slate-50 transition-colors group">
+                filteredDepartments.map((dept) => (
+                  <tr key={dept.id || dept.name} className="hover:bg-slate-50/60 transition-colors group">
                     <td className="px-6 py-4">
-                      <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
-                          <span className="material-symbols-outlined">{dept.icon}</span>
+                      <div className="flex items-center gap-3.5">
+                        <div className="w-11 h-11 rounded-xl bg-blue-50 text-[#275B99] flex items-center justify-center shrink-0 border border-blue-100 shadow-sm">
+                          <span className="material-symbols-outlined text-2xl">
+                            {dept.icon || 'medical_services'}
+                          </span>
                         </div>
-                        <div className="font-bold text-slate-900">{dept.name}</div>
+                        <div>
+                          <div className="font-bold text-slate-900 text-sm">{dept.name}</div>
+                          <div className="text-[10px] text-slate-400 font-mono mt-0.5">Icon: {dept.icon || 'medical_services'}</div>
+                        </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm text-slate-600 max-w-xs truncate">{dept.description}</td>
+                    <td className="px-6 py-4 text-slate-600 max-w-md">
+                      {dept.description || 'Specialized diagnostic procedures and advanced clinical care.'}
+                    </td>
                     <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <button 
+                      <div className="flex items-center justify-end gap-1.5">
+                        <button
                           onClick={() => handleOpenModal(dept)}
-                          className="p-1.5 text-blue-600 hover:bg-blue-50 rounded"
+                          className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                          title="Edit Department"
                         >
                           <MdEdit size={18} />
                         </button>
-                        <button 
+                        <button
                           onClick={() => handleDelete(dept.id)}
-                          className="p-1.5 text-red-600 hover:bg-red-50 rounded"
+                          className="p-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          title="Delete Department"
                         >
                           <MdDelete size={18} />
                         </button>
@@ -134,44 +199,96 @@ const AdminDepartments = () => {
         </div>
       </div>
 
-      {/* Modal */}
+      {/* Modal Dialog */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl shadow-xl w-full max-w-md flex flex-col">
-            <div className="p-6 border-b border-slate-100 flex justify-between items-center">
-              <h3 className="font-bold text-xl text-slate-900">{editingDepartment ? 'Edit Department' : 'Add New Department'}</h3>
-              <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600">
+          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col overflow-hidden animate-scale-up">
+            <div className="p-6 border-b border-slate-100 flex justify-between items-center bg-slate-50">
+              <div>
+                <h3 className="font-black text-xl text-slate-900">
+                  {editingDepartment ? 'Edit Medical Department' : 'Add New Department'}
+                </h3>
+                <p className="text-xs text-slate-500 font-medium">
+                  Define department metadata and select a specialty icon.
+                </p>
+              </div>
+              <button onClick={() => setIsModalOpen(false)} className="text-slate-400 hover:text-slate-600 p-1">
                 <span className="material-symbols-outlined">close</span>
               </button>
             </div>
-            
-            <div className="p-6 overflow-y-auto">
-              <form id="deptForm" onSubmit={handleSave} className="grid grid-cols-1 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Department Name</label>
-                  <input required type="text" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="w-full border border-slate-200 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Material Icon Name</label>
-                  <input required type="text" value={formData.icon} onChange={e => setFormData({...formData, icon: e.target.value})} className="w-full border border-slate-200 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none" placeholder="e.g. child_care, psychology" />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-1">Description</label>
-                  <textarea rows="3" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="w-full border border-slate-200 rounded-lg p-2 focus:ring-2 focus:ring-blue-500 outline-none"></textarea>
-                </div>
-              </form>
-            </div>
 
-            <div className="p-4 border-t border-slate-100 flex justify-end gap-3 bg-slate-50 rounded-b-2xl">
-              <button onClick={() => setIsModalOpen(false)} className="px-4 py-2 font-medium text-slate-600 hover:text-slate-900">Cancel</button>
-              <button type="submit" form="deptForm" className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg font-medium transition-colors">
-                {editingDepartment ? 'Update' : 'Save'}
-              </button>
-            </div>
+            <form onSubmit={handleSave} className="p-6 overflow-y-auto space-y-4 text-xs">
+              <div>
+                <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
+                  Department Name <span className="text-red-500">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Neurology, Cardiology, Orthopedics"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 font-semibold text-slate-900 focus:ring-2 focus:ring-blue-600 outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
+                  Department Icon
+                </label>
+                <select
+                  value={formData.icon}
+                  onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 font-semibold text-slate-900 focus:ring-2 focus:ring-blue-600 outline-none cursor-pointer mb-2"
+                >
+                  {DEPARTMENT_ICONS.map(i => (
+                    <option key={i.value} value={i.value}>{i.label}</option>
+                  ))}
+                  <option value="custom">Custom Icon Name...</option>
+                </select>
+
+                <input
+                  type="text"
+                  placeholder="Or enter any Google Material Symbol name..."
+                  value={formData.icon}
+                  onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-2.5 font-mono text-xs text-slate-700 focus:ring-2 focus:ring-blue-600 outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block font-bold text-slate-700 uppercase tracking-wider mb-1">
+                  Clinical Description
+                </label>
+                <textarea
+                  rows={3}
+                  placeholder="Briefly describe conditions treated, specialized therapies, and diagnostic capabilities..."
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                  className="w-full bg-slate-50 border border-slate-200 rounded-xl p-3 font-medium text-slate-900 focus:ring-2 focus:ring-blue-600 outline-none"
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="pt-4 border-t border-slate-100 flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="px-5 py-2.5 rounded-xl font-bold text-slate-600 hover:bg-slate-100 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2.5 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-sm active:scale-95"
+                >
+                  {editingDepartment ? 'Save Changes' : 'Create Department'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
-
     </div>
   );
 };

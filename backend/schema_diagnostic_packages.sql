@@ -117,15 +117,33 @@ CREATE TABLE IF NOT EXISTS public.package_bookings (
     patient_name TEXT DEFAULT 'Percy Boyina',
     hospital_id UUID,
     package_id UUID,
-    booking_reference TEXT UNIQUE NOT NULL,
-    appointment_date TEXT NOT NULL,
-    appointment_time TEXT NOT NULL,
+    booking_reference TEXT UNIQUE,
+    appointment_date TEXT,
+    appointment_time TEXT,
     booking_status TEXT DEFAULT 'confirmed',
     payment_status TEXT DEFAULT 'paid',
-    amount NUMERIC NOT NULL,
+    amount NUMERIC DEFAULT 0,
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Ensure columns exist if package_bookings table was created previously
+ALTER TABLE public.package_bookings ADD COLUMN IF NOT EXISTS user_id TEXT;
+ALTER TABLE public.package_bookings ADD COLUMN IF NOT EXISTS patient_name TEXT;
+ALTER TABLE public.package_bookings ADD COLUMN IF NOT EXISTS hospital_id UUID;
+ALTER TABLE public.package_bookings ADD COLUMN IF NOT EXISTS package_id UUID;
+ALTER TABLE public.package_bookings ADD COLUMN IF NOT EXISTS booking_reference TEXT;
+ALTER TABLE public.package_bookings ADD COLUMN IF NOT EXISTS appointment_date TEXT;
+ALTER TABLE public.package_bookings ADD COLUMN IF NOT EXISTS appointment_time TEXT;
+ALTER TABLE public.package_bookings ADD COLUMN IF NOT EXISTS booking_status TEXT DEFAULT 'confirmed';
+ALTER TABLE public.package_bookings ADD COLUMN IF NOT EXISTS payment_status TEXT DEFAULT 'paid';
+ALTER TABLE public.package_bookings ADD COLUMN IF NOT EXISTS amount NUMERIC DEFAULT 0;
+ALTER TABLE public.package_bookings ADD COLUMN IF NOT EXISTS patient_phone TEXT;
+ALTER TABLE public.package_bookings ADD COLUMN IF NOT EXISTS patient_email TEXT;
+ALTER TABLE public.package_bookings ADD COLUMN IF NOT EXISTS collection_type TEXT DEFAULT 'home_collection';
+ALTER TABLE public.package_bookings ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'Confirmed';
+ALTER TABLE public.package_bookings ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW();
+ALTER TABLE public.package_bookings ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
 
 -- ---------------------------------------------------------
 -- 6. SAMPLE COLLECTION SLOTS TABLE
@@ -142,6 +160,17 @@ CREATE TABLE IF NOT EXISTS public.sample_collection_slots (
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+-- Ensure columns exist if sample_collection_slots was created previously
+ALTER TABLE public.sample_collection_slots ADD COLUMN IF NOT EXISTS hospital_id UUID;
+ALTER TABLE public.sample_collection_slots ADD COLUMN IF NOT EXISTS slot_date TEXT;
+ALTER TABLE public.sample_collection_slots ADD COLUMN IF NOT EXISTS start_time TIME DEFAULT '07:00:00';
+ALTER TABLE public.sample_collection_slots ADD COLUMN IF NOT EXISTS end_time TIME DEFAULT '12:00:00';
+ALTER TABLE public.sample_collection_slots ADD COLUMN IF NOT EXISTS max_bookings INTEGER DEFAULT 10;
+ALTER TABLE public.sample_collection_slots ADD COLUMN IF NOT EXISTS available_slots INTEGER DEFAULT 10;
+ALTER TABLE public.sample_collection_slots ADD COLUMN IF NOT EXISTS status TEXT DEFAULT 'active';
+ALTER TABLE public.sample_collection_slots ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ DEFAULT NOW();
+ALTER TABLE public.sample_collection_slots ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ DEFAULT NOW();
 
 -- =========================================================
 -- INDEXES FOR PERFORMANCE & FAST QUERYING

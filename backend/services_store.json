@@ -1,0 +1,74 @@
+[
+  {
+    "id": "serv-1",
+    "title": "Clinical Specialists",
+    "subtitle": "Expert consultations",
+    "description": "Comprehensive one-on-one evaluations with board-certified physicians across multiple specialized disciplines.",
+    "icon": "Stethoscope",
+    "path": "/doctors",
+    "badge": "Top Rated",
+    "is_active": true,
+    "display_order": 1,
+    "bg_color": "bg-blue-50 text-[#275B99]"
+  },
+  {
+    "id": "serv-2",
+    "title": "Our Care Facilities",
+    "subtitle": "State-of-the-art centers",
+    "description": "Leading hospitals and surgical wings equipped with modern diagnostic units and patient-friendly suites.",
+    "icon": "Building2",
+    "path": "/hospitals",
+    "badge": "Verified",
+    "is_active": true,
+    "display_order": 2,
+    "bg_color": "bg-green-50 text-[#4D9B2A]"
+  },
+  {
+    "id": "serv-3",
+    "title": "Direct Coverage",
+    "subtitle": "Stress-free billing",
+    "description": "Seamless cashless hospital admission and immediate insurance pre-authorization with major providers.",
+    "icon": "ShieldCheck",
+    "path": "/insurance",
+    "badge": "Cashless",
+    "is_active": true,
+    "display_order": 3,
+    "bg_color": "bg-blue-50 text-[#275B99]"
+  },
+  {
+    "id": "serv-4",
+    "title": "Wellness Panels",
+    "subtitle": "Proactive screenings",
+    "description": "Thorough full-body preventative health checkups, cardiovascular panels, and executive wellness packages.",
+    "icon": "Activity",
+    "path": "/packages",
+    "badge": "Popular",
+    "is_active": true,
+    "display_order": 4,
+    "bg_color": "bg-green-50 text-[#4D9B2A]"
+  },
+  {
+    "id": "serv-5",
+    "title": "Advanced Diagnostics",
+    "subtitle": "High-precision testing",
+    "description": "State-of-the-art radiology, clinical pathology, and imaging facilities delivering rapid digital lab reports.",
+    "icon": "Microscope",
+    "path": "/book-appointment",
+    "badge": "24h Reports",
+    "is_active": true,
+    "display_order": 5,
+    "bg_color": "bg-blue-50 text-[#275B99]"
+  },
+  {
+    "id": "serv-6",
+    "title": "Immediate Response",
+    "subtitle": "24/7 emergency dispatch",
+    "description": "Round-the-clock priority trauma triage, rapid critical ambulance transport, and acute care assistance.",
+    "icon": "Phone",
+    "path": "/book-appointment",
+    "badge": "24/7 Urgent",
+    "is_active": true,
+    "display_order": 6,
+    "bg_color": "bg-green-50 text-[#4D9B2A]"
+  }
+]

@@ -181,9 +181,9 @@ const PackageDetailsPage = () => {
                 <div className="space-y-1 border-b border-slate-100 pb-4">
                   <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Discounted Package Price</span>
                   <div className="flex items-baseline gap-3">
-                    <span className="font-black text-slate-900 text-3xl">${discPrice}</span>
+                    <span className="font-black text-slate-900 text-3xl">₹{discPrice}</span>
                     {savings > 0 && (
-                      <span className="text-sm text-slate-400 line-through">${origPrice}</span>
+                      <span className="text-sm text-slate-400 line-through">₹{origPrice}</span>
                     )}
                   </div>
                 </div>

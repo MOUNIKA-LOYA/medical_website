@@ -18,6 +18,11 @@ const DoctorCard = ({ doctor }) => {
   const doctorDisplayName = isNameInvalid ? 'Doctor Name Not Available' : doctor.name;
   const doctorSpecialty = doctor.title || doctor.specialty || doctor.department || 'Healthcare Specialist';
 
+  const hospitalName = doctor.hospital_name || doctor.schedule_details?.hospital_name || 'Prana Main Medical Center';
+  const locationAddress = doctor.location_address || doctor.schedule_details?.location_address || 'Medical District';
+  const consultationFee = Number(doctor.consultation_fee) || 500;
+  const discountedFee = Math.round(consultationFee * 0.9);
+
   return (
     <div
       className="group bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-xl hover:border-blue-200 transition-all duration-300 flex flex-col md:flex-row items-stretch justify-between gap-6"
@@ -78,7 +83,7 @@ const DoctorCard = ({ doctor }) => {
             </div>
           </div>
 
-          {/* Qualification, Experience, Department */}
+          {/* Qualification, Experience, Department, Hospital */}
           <div className="mt-3 text-xs text-slate-500 space-y-1 font-medium">
             <p>
               <strong className="text-slate-700">
@@ -86,7 +91,10 @@ const DoctorCard = ({ doctor }) => {
               </strong>
               {' '}• MBBS, MS, MD ({doctor.department || doctor.specialty || 'General Care'})
             </p>
-            <p className="text-slate-600">Prana Main Medical Center, Medical District</p>
+            <p className="text-slate-600 flex items-center gap-1">
+              <MapPin className="w-3.5 h-3.5 text-[#275B99] shrink-0" />
+              <span>{hospitalName}{locationAddress ? ` • ${locationAddress}` : ''}</span>
+            </p>
           </div>
 
           {/* Specialty Treatment Tags */}
@@ -114,8 +122,10 @@ const DoctorCard = ({ doctor }) => {
             </span>
           </div>
 
-          <div className="text-slate-900 font-extrabold text-sm">
-            $150 <span className="text-[10px] text-slate-400 font-normal">Consultation Fee</span>
+          <div className="text-slate-900 font-extrabold text-sm flex items-center gap-1.5">
+            <span className="text-slate-400 line-through text-xs font-normal">₹{consultationFee}</span>
+            <span className="text-blue-700 font-black">₹{discountedFee}</span>
+            <span className="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-100">10% OFF</span>
           </div>
         </div>
       </div>
@@ -141,14 +151,14 @@ const DoctorCard = ({ doctor }) => {
             data-testid={`book-now-btn-${doctor.id}`}
           >
             <CalendarCheck className="w-4 h-4" />
-            <span>Book Appointment</span>
+            <span>Book Consultation</span>
           </Link>
 
           <Link
             to={`/book-appointment/${doctor.id}`}
             className="w-full py-2 text-center block text-xs font-bold text-[#275B99] hover:underline"
           >
-            View Profile
+            View Profile & Schedule
           </Link>
         </div>
       </div>

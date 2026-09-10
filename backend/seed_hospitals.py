@@ -2,22 +2,37 @@
 Seed script for Hospital Wise Module - Populates hospitals, departments, doctors, availability,
 diagnostic tests, diagnostic packages, package_tests, reviews, and gallery images.
 """
-from supabase import create_client, Client
+try:
+    from supabase import create_client, Client
+except ImportError:
+    create_client = None
+    Client = None
+
 from dotenv import load_dotenv
 import os
 from pathlib import Path
-import json
 import uuid
-from datetime import datetime, timezone
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
-supabase_url = os.environ.get('SUPABASE_URL') or os.environ.get('REACT_APP_SUPABASE_URL', 'https://rdhoikphrxgyoyqdqzat.supabase.co')
-supabase_key = os.environ.get('SUPABASE_KEY') or os.environ.get('REACT_APP_SUPABASE_ANON_KEY', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJkaG9pa3BocnhneW95cWRxemF0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ0MjExODksImV4cCI6MjA4OTk5NzE4OX0.VaKH0kUoQqg81Tpr_Zxpnaifi8zJndCpaVawRxQMBHU')
+supabase_url = (
+    os.environ.get('SUPABASE_URL')
+    or os.environ.get('NEXT_PUBLIC_SUPABASE_URL')
+    or os.environ.get('REACT_APP_SUPABASE_URL', 'https://xpwkgsiaavpzwjnflghe.supabase.co')
+)
+supabase_key = (
+    os.environ.get('SUPABASE_KEY')
+    or os.environ.get('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY')
+    or os.environ.get('NEXT_PUBLIC_SUPABASE_ANON_KEY')
+    or os.environ.get('REACT_APP_SUPABASE_ANON_KEY', 'sb_publishable_UT4qq3-iFC2KQatcMPKzpQ_rD-P1rmh')
+)
 
 try:
-    supabase_client: Client = create_client(supabase_url, supabase_key)
+    if create_client and supabase_url and supabase_key:
+        supabase_client: Client = create_client(supabase_url, supabase_key)
+    else:
+        supabase_client = None
 except Exception as e:
     print(f"Error connecting to Supabase: {e}")
     supabase_client = None
@@ -425,7 +440,7 @@ def _seed_all_internal():
             
         try:
             print(f"Upserting {len(mapped_records)} records into table '{table_name}'...")
-            res = supabase_client.table(table_name).upsert(mapped_records).execute()
+            supabase_client.table(table_name).upsert(mapped_records).execute()
             print(f"[OK] Table '{table_name}' seeded successfully.")
         except Exception as e:
             print(f"Note/Error seeding '{table_name}': {e}")

@@ -369,7 +369,10 @@ const HospitalDetailsPage = () => {
                       <div className="flex items-center justify-between pt-2 border-t border-slate-100">
                         <div>
                           <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Fee</span>
-                          <span className="font-black text-slate-900 text-base">${doc.consultation_fee || 120}</span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="font-black text-slate-900 text-base">₹{Math.round((doc.consultation_fee || 150) * 0.9)}</span>
+                            <span className="text-[10px] text-emerald-600 font-bold bg-emerald-50 px-1.5 py-0.5 rounded">10% OFF</span>
+                          </div>
                         </div>
                         <Link
                           to={`/book-appointment?doctorId=${doc.id}`}
@@ -427,9 +430,9 @@ const HospitalDetailsPage = () => {
 
                       <div className="flex items-center justify-between pt-2">
                         <div className="flex items-baseline gap-2">
-                          <span className="font-black text-slate-900 text-xl">${test.discount_price || test.original_price}</span>
+                          <span className="font-black text-slate-900 text-xl">₹{test.discount_price || test.original_price}</span>
                           {test.discount_price && test.original_price > test.discount_price && (
-                            <span className="text-xs text-slate-400 line-through">${test.original_price}</span>
+                            <span className="text-xs text-slate-400 line-through">₹{test.original_price}</span>
                           )}
                         </div>
                         <button className="py-2 px-4 bg-slate-100 hover:bg-slate-900 hover:text-white text-slate-800 rounded-xl text-xs font-bold transition-all">
@@ -484,9 +487,9 @@ const HospitalDetailsPage = () => {
 
                         <div className="flex items-center justify-between pt-4 border-t border-slate-100">
                           <div className="flex items-baseline gap-2">
-                            <span className="font-black text-emerald-600 text-2xl">${pkg.discount_price || pkg.original_price}</span>
+                            <span className="font-black text-emerald-600 text-2xl">₹{pkg.discount_price || pkg.original_price}</span>
                             {pkg.discount_price && pkg.original_price > pkg.discount_price && (
-                              <span className="text-xs text-slate-400 line-through">${pkg.original_price}</span>
+                              <span className="text-xs text-slate-400 line-through">₹{pkg.original_price}</span>
                             )}
                           </div>
                           <button className="py-2.5 px-6 bg-slate-900 hover:bg-emerald-600 text-white rounded-xl text-xs font-bold transition-all shadow-md">

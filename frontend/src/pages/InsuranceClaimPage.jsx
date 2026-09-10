@@ -297,7 +297,7 @@ const InsuranceClaimPage = () => {
                       >
                         <option value="">-- General Health Policy --</option>
                         {plans.map(pl => (
-                          <option key={pl.id} value={pl.id}>{pl.plan_name} (${Number(pl.coverage_amount).toLocaleString()} Cover)</option>
+                          <option key={pl.id} value={pl.id}>{pl.plan_name} (₹{Number(pl.coverage_amount).toLocaleString()} Cover)</option>
                         ))}
                       </select>
                     </div>
@@ -320,7 +320,7 @@ const InsuranceClaimPage = () => {
                   <div className="grid md:grid-cols-2 gap-6">
                     <div>
                       <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-                        Claim Amount ($) *
+                        Claim Amount (₹) *
                       </label>
                       <input
                         type="number"
@@ -487,12 +487,12 @@ const InsuranceClaimPage = () => {
 
                     <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
                       <span className="text-slate-400 font-bold block text-[10px] uppercase">Claim Amount</span>
-                      <span className="font-bold text-slate-800">${Number(trackedClaim.claim_amount).toLocaleString()}</span>
+                      <span className="font-bold text-slate-800">₹{Number(trackedClaim.claim_amount).toLocaleString()}</span>
                     </div>
 
                     <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
                       <span className="text-slate-400 font-bold block text-[10px] uppercase">Approved Amount</span>
-                      <span className="font-bold text-emerald-600 text-sm">${Number(trackedClaim.approved_amount || 0).toLocaleString()}</span>
+                      <span className="font-bold text-emerald-600 text-sm">₹{Number(trackedClaim.approved_amount || 0).toLocaleString()}</span>
                     </div>
                   </div>
 
@@ -545,7 +545,7 @@ const InsuranceClaimPage = () => {
                             </span>
                           </div>
                           <h4 className="font-headline font-bold text-slate-900 text-base">
-                            {c.provider?.provider_name || 'Insurance Claim'} • ${Number(c.claim_amount).toLocaleString()}
+                            {c.provider?.provider_name || 'Insurance Claim'} • ₹{Number(c.claim_amount).toLocaleString()}
                           </h4>
                           <p className="text-xs text-slate-500">{c.hospital?.hospital_name} • Submitted {new Date(c.submitted_at).toLocaleDateString()}</p>
                         </div>
