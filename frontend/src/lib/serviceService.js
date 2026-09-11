@@ -1,3 +1,5 @@
+import { supabase } from './supabaseClient';
+
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || 'http://127.0.0.1:8000';
 const STORAGE_KEY = 'prana_healthcare_services';
 
@@ -101,24 +103,54 @@ const setStoredServices = (services) => {
   }
 };
 
+const notifyServicesUpdated = () => {
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('services_updated'));
+  }
+};
+
 export const serviceService = {
   /**
-   * Get all healthcare services
+   * Get all healthcare services (Merged from Supabase + Backend + LocalStorage + Defaults)
    */
   async getServices() {
+    let merged = new Map();
+
+    // 1. Seed defaults first
+    DEFAULT_SERVICES.forEach(s => merged.set(s.id || s.title.toLowerCase().trim(), s));
+
+    // 2. Load stored local services
+    const local = getStoredServices();
+    if (Array.isArray(local)) {
+      local.forEach(s => merged.set(s.id || s.title.toLowerCase().trim(), s));
+    }
+
+    // 3. Try Supabase Client
+    try {
+      const { data, error } = await supabase.from('services').select('*').order('display_order', { ascending: true });
+      if (!error && Array.isArray(data) && data.length > 0) {
+        data.forEach(s => merged.set(s.id || s.title.toLowerCase().trim(), s));
+      }
+    } catch (e) {
+      console.warn('Supabase query for services skipped:', e);
+    }
+
+    // 4. Try Backend API
     try {
       const res = await fetch(`${BACKEND_URL}/api/services`);
       if (res.ok) {
-        const data = await res.json();
-        if (Array.isArray(data) && data.length > 0) {
-          setStoredServices(data);
-          return data;
+        const backendData = await res.json();
+        if (Array.isArray(backendData) && backendData.length > 0) {
+          backendData.forEach(s => merged.set(s.id || s.title.toLowerCase().trim(), s));
         }
       }
     } catch (err) {
-      console.warn('Backend query for services failed, using local store:', err);
+      // Backend offline/serverless, continue with merged data
     }
-    return getStoredServices();
+
+    const list = Array.from(merged.values()).sort((a, b) => (a.display_order || 0) - (b.display_order || 0));
+    setStoredServices(list);
+    return list;
   },
 
   /**
@@ -126,39 +158,42 @@ export const serviceService = {
    */
   async createService(serviceData) {
     const newService = {
-      id: 'serv-' + Date.now(),
-      title: serviceData.title,
-      subtitle: serviceData.subtitle || '',
-      description: serviceData.description || '',
+      id: serviceData.id || 'serv-' + Date.now(),
+      title: serviceData.title.trim(),
+      subtitle: serviceData.subtitle ? serviceData.subtitle.trim() : '',
+      description: serviceData.description ? serviceData.description.trim() : '',
       icon: serviceData.icon || 'Stethoscope',
       path: serviceData.path || '/doctors',
-      badge: serviceData.badge || '',
+      badge: serviceData.badge ? serviceData.badge.trim() : '',
       is_active: serviceData.is_active !== undefined ? serviceData.is_active : true,
       display_order: serviceData.display_order ? parseInt(serviceData.display_order) : 0,
       bg_color: serviceData.bg_color || 'bg-blue-50 text-[#275B99]'
     };
 
-    // 1. Try Backend
+    // 1. Try Supabase
     try {
-      const res = await fetch(`${BACKEND_URL}/api/services`, {
+      await supabase.from('services').upsert(newService);
+    } catch (e) {
+      console.warn('Supabase insert service skipped:', e);
+    }
+
+    // 2. Try Backend
+    try {
+      await fetch(`${BACKEND_URL}/api/services`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newService)
       });
-      if (res.ok) {
-        const data = await res.json();
-        const current = getStoredServices();
-        setStoredServices([...current, data]);
-        return data;
-      }
     } catch (e) {
-      console.warn('Failed to save service on backend, storing locally:', e);
+      console.warn('Backend insert service skipped:', e);
     }
 
-    // 2. Fallback to local storage
+    // 3. Save locally
     const current = getStoredServices();
-    const updated = [...current, newService];
+    const updated = [...current.filter(s => s.id !== newService.id), newService];
     setStoredServices(updated);
+
+    notifyServicesUpdated();
     return newService;
   },
 
@@ -167,39 +202,41 @@ export const serviceService = {
    */
   async updateService(id, serviceData) {
     const payload = {
-      title: serviceData.title,
-      subtitle: serviceData.subtitle || '',
-      description: serviceData.description || '',
+      title: serviceData.title.trim(),
+      subtitle: serviceData.subtitle ? serviceData.subtitle.trim() : '',
+      description: serviceData.description ? serviceData.description.trim() : '',
       icon: serviceData.icon || 'Stethoscope',
       path: serviceData.path || '/doctors',
-      badge: serviceData.badge || '',
+      badge: serviceData.badge ? serviceData.badge.trim() : '',
       is_active: serviceData.is_active !== undefined ? serviceData.is_active : true,
       display_order: serviceData.display_order ? parseInt(serviceData.display_order) : 0,
       bg_color: serviceData.bg_color || 'bg-blue-50 text-[#275B99]'
     };
 
-    // 1. Try Backend
+    // 1. Try Supabase
     try {
-      const res = await fetch(`${BACKEND_URL}/api/services/${id}`, {
+      await supabase.from('services').update(payload).eq('id', id);
+    } catch (e) {
+      console.warn('Supabase update service skipped:', e);
+    }
+
+    // 2. Try Backend
+    try {
+      await fetch(`${BACKEND_URL}/api/services/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
-      if (res.ok) {
-        const data = await res.json();
-        const current = getStoredServices();
-        const updated = current.map(s => (s.id === id ? { ...s, ...data } : s));
-        setStoredServices(updated);
-        return data;
-      }
     } catch (e) {
-      console.warn('Failed to update service on backend, updating locally:', e);
+      console.warn('Backend update service skipped:', e);
     }
 
-    // 2. Fallback to local storage
+    // 3. Update locally
     const current = getStoredServices();
     const updated = current.map(s => (s.id === id ? { ...s, ...payload } : s));
     setStoredServices(updated);
+
+    notifyServicesUpdated();
     return { id, ...payload };
   },
 
@@ -207,25 +244,29 @@ export const serviceService = {
    * Delete a service
    */
   async deleteService(id) {
-    // 1. Try Backend
+    // 1. Try Supabase
     try {
-      const res = await fetch(`${BACKEND_URL}/api/services/${id}`, {
-        method: 'DELETE'
-      });
-      if (res.ok) {
-        const current = getStoredServices();
-        const updated = current.filter(s => s.id !== id);
-        setStoredServices(updated);
-        return true;
-      }
+      await supabase.from('services').delete().eq('id', id);
     } catch (e) {
-      console.warn('Failed to delete service on backend, removing locally:', e);
+      console.warn('Supabase delete service skipped:', e);
     }
 
-    // 2. Fallback to local storage
+    // 2. Try Backend
+    try {
+      await fetch(`${BACKEND_URL}/api/services/${id}`, {
+        method: 'DELETE'
+      });
+    } catch (e) {
+      console.warn('Backend delete service skipped:', e);
+    }
+
+    // 3. Remove locally
     const current = getStoredServices();
     const updated = current.filter(s => s.id !== id);
     setStoredServices(updated);
+
+    notifyServicesUpdated();
     return true;
   }
 };
+

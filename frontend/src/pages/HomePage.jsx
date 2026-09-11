@@ -175,6 +175,25 @@ const HomePage = () => {
       }
     };
     loadHomepageData();
+
+    const handleServicesRefresh = async () => {
+      try {
+        const freshServices = await serviceService.getServices();
+        if (freshServices && Array.isArray(freshServices)) {
+          setServices(freshServices);
+        }
+      } catch (e) {
+        console.warn('Error refreshing services in HomePage:', e);
+      }
+    };
+
+    window.addEventListener('services_updated', handleServicesRefresh);
+    window.addEventListener('storage', handleServicesRefresh);
+
+    return () => {
+      window.removeEventListener('services_updated', handleServicesRefresh);
+      window.removeEventListener('storage', handleServicesRefresh);
+    };
   }, []);
 
   // Keep the ref mirror in sync whenever sliderAutoplay state changes
