@@ -42,8 +42,8 @@ const AdminLogin = () => {
               <span className="material-symbols-outlined text-3xl">medical_services</span>
             </div>
             <h2 className="text-3xl font-black text-slate-900 mb-2 tracking-tight">Staff Login</h2>
-            <p className="text-slate-500 font-medium italic text-xs mt-2 text-center bg-blue-50 p-2 rounded-lg">
-              Tip: Use <strong>admin@hospital.com</strong> / <strong>admin123</strong> if you haven't set up Supabase Auth yet.
+            <p className="text-slate-500 font-medium text-xs mt-1">
+              Enter your credentials to access the administration portal.
             </p>
           </div>
 
