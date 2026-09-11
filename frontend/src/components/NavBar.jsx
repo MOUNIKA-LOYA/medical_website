@@ -218,7 +218,7 @@ const NavBar = () => {
                 <span>Departments</span>
               </Link>
 
-              {/* Services Dropdown - Structured 2-Column Mega Menu */}
+              {/* Services Dropdown - Perfect & Neat 2-Column Grid */}
               <div 
                 className="relative h-full flex items-center"
                 onMouseEnter={handleMouseEnter}
@@ -238,35 +238,30 @@ const NavBar = () => {
 
                 {/* Dropdown Container with Hover Bridge */}
                 <div 
-                  className={`absolute top-[88%] left-1/2 -translate-x-1/2 pt-2.5 transition-all duration-200 z-50 origin-top ${
+                  className={`absolute top-[90%] left-1/2 -translate-x-1/2 pt-2.5 transition-all duration-200 z-50 origin-top ${
                     isDropdownOpen ? 'opacity-100 scale-100 pointer-events-auto' : 'opacity-0 scale-95 pointer-events-none'
                   }`}
                 >
-                  <div className="w-[660px] lg:w-[720px] bg-white rounded-2xl shadow-2xl border border-slate-200/90 overflow-hidden ring-1 ring-black/5">
+                  <div className="w-[580px] lg:w-[620px] bg-white rounded-2xl shadow-2xl border border-slate-200/90 overflow-hidden ring-1 ring-black/5">
                     {/* Top Banner Header */}
-                    <div className="p-3.5 px-5 border-b border-slate-100 bg-gradient-to-r from-slate-50 via-blue-50/30 to-slate-50 flex items-center justify-between">
+                    <div className="py-3 px-5 border-b border-slate-100 bg-slate-50/80 flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <span className="w-2 h-2 rounded-full bg-[#4D9B2A] animate-pulse" />
-                        <span className="text-[11px] font-bold text-slate-600 uppercase tracking-wider">Healthcare Services & Clinical Care</span>
+                        <span className="text-xs font-bold text-slate-700 uppercase tracking-wider">Healthcare Services</span>
                       </div>
                       <span className="bg-[#275B99]/10 text-[#275B99] border border-[#275B99]/20 text-[10px] font-bold px-2.5 py-0.5 rounded-full">
-                        {activeServices.length} Network Services
+                        {activeServices.length} Available
                       </span>
                     </div>
 
-                    {/* 2-Column Mega Layout */}
-                    <div className="grid grid-cols-12 divide-x divide-slate-100 max-h-[420px]">
-                      {/* Left Column: Core Solutions (6 items) */}
-                      <div className="col-span-7 p-3 space-y-1 overflow-y-auto custom-scrollbar">
-                        <div className="px-2 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
-                          <span>Primary Care & Services</span>
-                          <span className="text-[10px] text-[#275B99] font-semibold">Core Solutions</span>
-                        </div>
+                    {/* Neat 2-Column Services Grid */}
+                    <div className="p-3.5 max-h-[380px] overflow-y-auto custom-scrollbar">
+                      <div className="grid grid-cols-2 gap-2.5">
                         {activeServices.map((service) => (
                           <Link
                             key={service.id}
                             to={service.path || '/#services'}
-                            className="flex items-start gap-3 p-2.5 rounded-xl hover:bg-blue-50/70 transition-all group/item border border-transparent hover:border-blue-100/60"
+                            className="flex items-start gap-3 p-2.5 rounded-xl border border-slate-100/90 hover:border-blue-200 bg-slate-50/40 hover:bg-blue-50/60 transition-all group/item shadow-xs hover:shadow-sm"
                             onClick={() => setIsDropdownOpen(false)}
                           >
                             <div className="w-9 h-9 rounded-xl bg-blue-50 text-[#275B99] flex items-center justify-center shrink-0 group-hover/item:bg-[#275B99] group-hover/item:text-white transition-all shadow-xs">
@@ -278,72 +273,36 @@ const NavBar = () => {
                                   {service.title}
                                 </span>
                                 {service.badge && (
-                                  <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-emerald-50 text-[#4D9B2A] border border-emerald-200 shrink-0">
+                                  <span className="text-[8px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-emerald-50 text-[#4D9B2A] border border-emerald-200 shrink-0">
                                     {service.badge}
                                   </span>
                                 )}
                               </div>
-                              <p className="text-[11px] text-slate-500 line-clamp-1 mt-0.5">
-                                {service.subtitle || service.description || 'Comprehensive clinical healthcare service'}
+                              <p className="text-[11px] text-slate-500 line-clamp-1 mt-0.5 group-hover/item:text-slate-600">
+                                {service.subtitle || service.description || 'Comprehensive clinical care'}
                               </p>
                             </div>
                           </Link>
                         ))}
                       </div>
-
-                      {/* Right Column: Clinical Specialties (Departments) */}
-                      <div className="col-span-5 p-3 bg-slate-50/50 flex flex-col justify-between overflow-y-auto custom-scrollbar">
-                        <div className="space-y-1">
-                          <div className="px-2 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
-                            <span>Clinical Specialties</span>
-                            <span className="text-[10px] text-emerald-600 font-semibold">Departments</span>
-                          </div>
-                          <div className="grid grid-cols-1 gap-1">
-                            {departments.slice(0, 9).map((dept) => (
-                              <Link
-                                key={dept.id || dept.name}
-                                to={`/doctors?department=${encodeURIComponent(dept.name)}`}
-                                className="flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-semibold text-slate-700 hover:text-[#275B99] hover:bg-white hover:shadow-xs transition-all group/dept"
-                                onClick={() => setIsDropdownOpen(false)}
-                              >
-                                <span className="truncate group-hover/dept:translate-x-0.5 transition-transform">
-                                  {dept.name}
-                                </span>
-                                <ChevronRight className="w-3.5 h-3.5 text-slate-300 group-hover/dept:text-[#275B99] group-hover/dept:translate-x-0.5 transition-all shrink-0" />
-                              </Link>
-                            ))}
-                          </div>
-                        </div>
-
-                        <div className="pt-2 mt-2 border-t border-slate-200/60">
-                          <Link
-                            to="/departments"
-                            className="flex items-center justify-between px-2.5 py-1.5 rounded-lg text-xs font-bold text-[#275B99] hover:bg-blue-50/80 transition-all"
-                            onClick={() => setIsDropdownOpen(false)}
-                          >
-                            <span>View All Departments</span>
-                            <ArrowRight className="w-3.5 h-3.5" />
-                          </Link>
-                        </div>
-                      </div>
                     </div>
 
                     {/* Footer Quick Action Bar */}
-                    <div className="p-3 bg-slate-50/90 border-t border-slate-100 flex items-center justify-between px-5">
+                    <div className="py-2.5 px-5 bg-slate-50/90 border-t border-slate-100 flex items-center justify-between">
                       <Link 
                         to="/#services"
                         className="text-xs font-bold text-slate-700 hover:text-[#275B99] flex items-center gap-1.5 transition-colors"
                         onClick={() => setIsDropdownOpen(false)}
                       >
-                        <span>Explore Full Healthcare Directory</span>
+                        <span>Explore All Services</span>
                         <ArrowRight className="w-3.5 h-3.5 text-[#275B99]" />
                       </Link>
                       <Link
                         to="/book-appointment"
-                        className="text-[11px] font-bold text-[#4D9B2A] hover:underline flex items-center gap-1"
+                        className="text-xs font-bold text-[#4D9B2A] hover:underline flex items-center gap-1"
                         onClick={() => setIsDropdownOpen(false)}
                       >
-                        <span>Book Instant Appointment →</span>
+                        <span>Book Appointment →</span>
                       </Link>
                     </div>
                   </div>
